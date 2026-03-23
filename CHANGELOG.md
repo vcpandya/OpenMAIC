@@ -1,6 +1,10 @@
 # Changelog
 
+All notable changes to OpenMAIC are documented here. Versions follow [Semantic Versioning](https://semver.org/).
+
 ## [0.3.0] - 2026-03-23
+
+Major release: Learning intelligence (analytics, spaced repetition, adaptive difficulty), messaging integration (Telegram bot), daily auto-learning (Jina AI), and professional slide layout engine.
 
 ### New Features
 

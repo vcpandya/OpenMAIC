@@ -47,7 +47,14 @@ https://github.com/user-attachments/assets/b4ab35ac-f994-46b1-8957-e82fe87ff0e9
 - **One-click lesson generation** — Describe a topic or attach your materials; the AI builds a full lesson in minutes
 - **Multi-agent classroom** — AI teachers and peers lecture, discuss, and interact with you in real time
 - **Rich scene types** — Slides, quizzes, interactive HTML simulations, and project-based learning (PBL)
-- **Whiteboard & TTS** — Agents draw diagrams, write formulas, and explain out loud
+- **Whiteboard & TTS** — Agents draw diagrams, write formulas, and explain out loud with typewriter-style animations
+- **17 languages** — Generate content in English, Chinese, Spanish, French, German, Japanese, Korean, Hindi, Gujarati, Bengali, Tamil, Telugu, Marathi, and more
+- **3 depth modes** — ELI5 (beginner), Standard, Pro (advanced) — adapts content complexity automatically
+- **Spaced repetition** — SM-2 algorithm schedules review quizzes at optimal intervals for long-term retention
+- **Career-personalized** — Enter your background and career goals; content adapts with industry-relevant examples
+- **Organization mode** — Multi-user deployment with PostgreSQL, NextAuth.js, admin panel, invitations, and white-label branding
+- **Telegram bot** — Students learn directly from messaging apps — send a topic, get a classroom
+- **Daily auto-learning** — Jina AI researches trending topics daily and generates fresh lessons
 - **Export anywhere** — Download editable `.pptx` slides or interactive `.html` pages
 - **[OpenClaw integration](#-openclaw-integration)** — Generate classrooms from Feishu, Slack, Telegram, and 20+ messaging apps via your AI assistant
 
@@ -110,7 +117,7 @@ providers:
     apiKey: sk-ant-...
 ```
 
-Supported providers: **OpenAI**, **Anthropic**, **Google Gemini**, **DeepSeek**, **Grok (xAI)**, and any OpenAI-compatible API.
+Supported providers: **OpenAI**, **Anthropic**, **Google Gemini**, **DeepSeek**, **Grok (xAI)**, and any OpenAI-compatible API. Content can be generated in [17 languages](#personalization--adaptive-learning).
 
 > **Recommended model:** **Gemini 3 Flash** — best balance of quality and speed. For highest quality (at slower speed), try **Gemini 3.1 Pro**.
 >
@@ -122,13 +129,32 @@ Supported providers: **OpenAI**, **Anthropic**, **Google Gemini**, **DeepSeek**,
 pnpm dev
 ```
 
-Open **http://localhost:3000** and start learning!
+Open **http://localhost:3000** — the setup wizard will guide you through choosing Personal or Organization mode.
 
 ### 4. Build for Production
 
 ```bash
 pnpm build && pnpm start
 ```
+
+### Organization Mode (Multi-User)
+
+For team/school deployments with authentication, admin panel, and invitations:
+
+```bash
+# Set up PostgreSQL
+DATABASE_URL="postgresql://user:pass@localhost:5432/openmaic"
+AUTH_SECRET="$(openssl rand -base64 32)"
+DEPLOYMENT_MODE=organization
+
+# Run database migrations
+pnpm exec prisma db push
+
+# Start
+pnpm build && pnpm start
+```
+
+The first user to register becomes the Super Admin. See [Organization Mode](#organization-mode-multi-user) for details.
 
 ### Vercel Deployment
 
@@ -317,12 +343,64 @@ Optional config in `~/.openclaw/openclaw.json`:
 | **PowerPoint (.pptx)** | Fully editable slides with images, charts, and LaTeX formulas |
 | **Interactive HTML** | Self-contained web pages with interactive simulations |
 
+### Personalization & Adaptive Learning
+
+| Feature | Description |
+|---------|-------------|
+| **ELI5 / Standard / Pro** | Three explanation depth modes — content complexity adapts from beginner to expert |
+| **17 Languages** | Content generation in English, Chinese, Spanish, French, German, Japanese, Korean, Portuguese, Russian, Arabic, Hindi, Gujarati, Bengali, Tamil, Telugu, Marathi, Italian |
+| **Career-Aligned Content** | Enter your background and career goals; the AI uses industry-specific examples, local companies, and relevant case studies |
+| **Accent Colors & Fonts** | 8 accent color presets + 4 UI font options — personalize the look and feel |
+| **Class Profiles** | Import custom student personas that become AI classmates with unique personalities |
+| **Adaptive Difficulty** | Quiz scores tracked across sessions — system suggests upgrading or downgrading depth based on performance |
+| **Spaced Repetition** | SM-2 algorithm schedules review quizzes at increasing intervals (1d → 6d → dynamic) for proven long-term retention |
+
+### Organization Mode (Multi-User)
+
+Deploy OpenMAIC for your team, school, or company with full multi-user support:
+
+| Feature | Description |
+|---------|-------------|
+| **Setup Wizard** | Choose Personal (zero config) or Organization (PostgreSQL + auth) mode on first run |
+| **User Authentication** | NextAuth.js v5 with email/password + Google/GitHub OAuth |
+| **Role System** | Super Admin, Admin, Teacher, Student — with role-based access control |
+| **Admin Panel** | Dashboard with stats, user management, invitation system, branding config |
+| **Invitation System** | Email invites, shareable codes, CSV bulk upload (up to 100 at once) |
+| **White-Label Branding** | Custom name, logo, primary color, favicon — via admin panel or environment variables |
+| **Telegram Bot** | Admin connects bot via token; students generate lessons from chat |
+| **Learning Analytics** | Track quiz scores, completion rates, scene views per student/classroom |
+
+### Daily Auto-Learning (Jina AI)
+
+Admins or users create **learning segments** (topic areas like "Machine Learning" or "Product Management"). The system:
+
+1. Uses [Jina AI](https://jina.ai/) to research trending content per segment
+2. Curates the top findings with summaries and source links
+3. Can auto-generate classrooms from the research (coming soon: scheduled daily cron)
+4. Delivers a daily digest of fresh learning material
+
+### Professional Slide Layout Engine
+
+Generated slides are automatically post-processed for professional quality:
+
+- **Grid alignment** — Elements snap to an 8px grid for clean visual alignment
+- **Margin enforcement** — No element touches the canvas edge (40px minimum margins)
+- **Overlap detection** — Overlapping elements are automatically separated
+- **4 style presets** — Corporate (clean, whitespace), Academic (dense, citation-friendly), Creative (asymmetric, visual), Dashboard (data-heavy)
+- **Auto-detection** — Preset chosen based on explanation depth (ELI5 → Creative, Pro → Academic)
+
 ### And More
 
-- **Text-to-Speech** — Multiple voice providers with customizable voices
+- **Slide Entrance Animations** — Elements appear progressively with fade+slide effects as the teacher explains
+- **Subtle Spotlight** — Soft indigo glow guides attention without darkening the slide
+- **Whiteboard Typewriter** — Text drawn on whiteboard reveals with a writing animation
+- **Expandable Discussions** — Discussion area auto-expands during live sessions, auto-collapses during lectures
+- **Session Journey** — Visual breadcrumb bar showing lesson progress with click-to-navigate
+- **Curated Tools** — LLM recommends relevant open-source tools, SaaS platforms, and resources per topic
+- **Text-to-Speech** — Multiple voice providers (Azure, ElevenLabs, Google, browser native)
 - **Speech Recognition** — Talk to your AI teacher using your microphone
 - **Web Search** — Agents search the web for up-to-date information during class
-- **i18n** — Interface supports Chinese and English
+- **Mobile Responsive** — Optimized for phones and tablets with touch-friendly controls
 - **Dark Mode** — Easy on the eyes for late-night study sessions
 
 ---
@@ -375,52 +453,64 @@ We welcome contributions from the community! Whether it's bug reports, feature i
 ```
 OpenMAIC/
 ├── app/                        # Next.js App Router
-│   ├── api/                    #   Server API routes (~18 endpoints)
+│   ├── api/                    #   Server API routes (30+ endpoints)
 │   │   ├── generate/           #     Scene generation pipeline (outlines, content, images, TTS …)
 │   │   ├── generate-classroom/ #     Async classroom job submission + polling
 │   │   ├── chat/               #     Multi-agent discussion (SSE streaming)
+│   │   ├── auth/               #     NextAuth.js handlers + registration
+│   │   ├── admin/              #     Admin APIs (users, invitations, branding)
+│   │   ├── analytics/          #     Learning event tracking + quiz attempts
+│   │   ├── review/             #     Spaced repetition (due items + SM-2 scheduling)
+│   │   ├── integrations/       #     Telegram bot setup + webhook
+│   │   ├── segments/           #     Learning segments + Jina research
 │   │   ├── pbl/                #     Project-Based Learning endpoints
-│   │   └── ...                 #     quiz-grade, parse-pdf, web-search, transcription, etc.
+│   │   └── ...                 #     quiz-grade, parse-pdf, web-search, etc.
+│   ├── admin/                  #   Admin panel (dashboard, users, invitations, branding)
+│   ├── auth/                   #   Login & registration pages
+│   ├── setup/                  #   Installation wizard (Personal vs Organization)
 │   ├── classroom/[id]/         #   Classroom playback page
 │   └── page.tsx                #   Home page (generation input)
 │
+├── prisma/                     # Database schema (PostgreSQL, Organization mode)
+│   └── schema.prisma           #   15 models: User, Org, Classroom, Analytics, Reviews…
+│
 ├── lib/                        # Core business logic
 │   ├── generation/             #   Two-stage lesson generation pipeline
+│   │   └── layout-engine.ts    #   Professional slide layout post-processor
 │   ├── orchestration/          #   LangGraph multi-agent orchestration (director graph)
 │   ├── playback/               #   Playback state machine (idle → playing → live)
 │   ├── action/                 #   Action execution engine (speech, whiteboard, effects)
+│   ├── analytics/              #   Adaptive difficulty engine
+│   ├── research/               #   Jina AI search & reader integration
 │   ├── ai/                     #   LLM provider abstraction
-│   ├── api/                    #   Stage API facade (slide/canvas/scene manipulation)
+│   ├── auth.ts                 #   NextAuth.js v5 configuration
+│   ├── db.ts                   #   Prisma client singleton
+│   ├── branding.ts             #   White-label branding config
 │   ├── store/                  #   Zustand state stores
-│   ├── types/                  #   Centralized TypeScript type definitions
+│   ├── types/                  #   TypeScript types (17 language codes, depth modes …)
 │   ├── audio/                  #   TTS & ASR providers
 │   ├── media/                  #   Image & video generation providers
 │   ├── export/                 #   PPTX & HTML export
 │   ├── hooks/                  #   React custom hooks (55+)
-│   ├── i18n/                   #   Internationalization (zh-CN, en-US)
+│   ├── i18n/                   #   Internationalization (17 languages)
 │   └── ...                     #   prosemirror, storage, pdf, web-search, utils
 │
-├── components/                 # React UI components
+├── middleware.ts               # Auth + setup wizard redirect logic
+│
+├── components/                 # React UI components (170+)
 │   ├── slide-renderer/         #   Canvas-based slide editor & renderer
-│   │   ├── Editor/Canvas/      #     Interactive editing canvas
-│   │   └── components/element/ #     Element renderers (text, image, shape, table, chart …)
-│   ├── scene-renderers/        #   Quiz, Interactive, PBL scene renderers
-│   ├── generation/             #   Lesson generation toolbar & progress
-│   ├── chat/                   #   Chat area & session management
-│   ├── settings/               #   Settings panel (providers, TTS, ASR, media …)
-│   ├── whiteboard/             #   SVG-based whiteboard drawing
-│   ├── agent/                  #   Agent avatar, config, info bar
-│   ├── ui/                     #   Base UI primitives (shadcn/ui + Radix)
-│   └── ...                     #   audio, roundtable, stage, ai-elements
+│   ├── stage/                  #   Session journey, recommended tools
+│   ├── settings/               #   Settings + appearance (accent colors, fonts)
+│   ├── whiteboard/             #   SVG whiteboard with typewriter text animation
+│   ├── roundtable/             #   Expandable discussion area
+│   └── ...                     #   agent, chat, generation, ui
 │
 ├── packages/                   # Workspace packages
 │   ├── pptxgenjs/              #   Customized PowerPoint generation
 │   └── mathml2omml/            #   MathML → Office Math conversion
 │
 ├── skills/                     # OpenClaw / ClawHub skills
-│   └── openmaic/               #   Guided OpenMAIC setup & generation SOP
-│       ├── SKILL.md            #   Thin router with confirmation rules
-│       └── references/         #   On-demand SOP sections
+│   └── openmaic/               #   Guided setup & generation SOP
 │
 ├── configs/                    # Shared constants (shapes, fonts, hotkeys, themes …)
 └── public/                     # Static assets (logos, avatars)
