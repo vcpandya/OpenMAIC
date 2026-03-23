@@ -364,11 +364,12 @@ Deploy OpenMAIC for your team, school, or company with full multi-user support:
 | **Setup Wizard** | Choose Personal (zero config) or Organization (PostgreSQL + auth) mode on first run |
 | **User Authentication** | NextAuth.js v5 with email/password + Google/GitHub OAuth |
 | **Role System** | Super Admin, Admin, Teacher, Student — with role-based access control |
-| **Admin Panel** | Dashboard with stats, user management, invitation system, branding config |
+| **Admin Panel** | 7 pages: Dashboard, Users, Invitations, Analytics, Auto-Learning, Integrations, Branding |
 | **Invitation System** | Email invites, shareable codes, CSV bulk upload (up to 100 at once) |
-| **White-Label Branding** | Custom name, logo, primary color, favicon — via admin panel or environment variables |
-| **Telegram Bot** | Admin connects bot via token; students generate lessons from chat |
-| **Learning Analytics** | Track quiz scores, completion rates, scene views per student/classroom |
+| **White-Label Branding** | Custom name, logo, primary color picker with presets, favicon — live preview in admin |
+| **Telegram Bot** | Admin connects via `/admin/integrations` — enter bot token, auto-configures webhook |
+| **Learning Analytics** | `/admin/analytics` — users, classrooms, quiz attempts + per-classroom API for completion rates and scores |
+| **Auto-Learning Segments** | `/admin/segments` — create topic segments, trigger Jina AI research, manage daily digests |
 
 ### Daily Auto-Learning (Jina AI)
 

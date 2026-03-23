@@ -4,9 +4,18 @@ All notable changes to OpenMAIC are documented here. Versions follow [Semantic V
 
 ## [0.3.0] - 2026-03-23
 
-Major release: Learning intelligence (analytics, spaced repetition, adaptive difficulty), messaging integration (Telegram bot), daily auto-learning (Jina AI), and professional slide layout engine.
+Major release: Learning intelligence (analytics, spaced repetition, adaptive difficulty), messaging integration (Telegram bot), daily auto-learning (Jina AI), professional slide layout engine, and complete admin panel.
 
 ### New Features
+
+#### Admin Panel — Full Feature Set
+- **Dashboard** (`/admin`) — Stat cards: total users, classrooms, pending invitations
+- **Users** (`/admin/users`) — User table with role badges (Super Admin/Admin/Teacher/Student), join dates
+- **Invitations** (`/admin/invitations`) — Create invites (email or open code), CSV bulk upload (100 max), copy link, revoke
+- **Analytics** (`/admin/analytics`) — Aggregate stats: total users, classrooms created, quiz attempts + per-classroom API
+- **Auto-Learning** (`/admin/segments`) — Create learning segments with keywords, trigger Jina AI research per segment
+- **Integrations** (`/admin/integrations`) — Telegram bot setup (enter BotFather token, auto-configure webhook, connection status)
+- **Branding** (`/admin/branding`) — Organization name, logo URL, primary color picker with 6 presets, favicon URL, live preview
 
 #### Learning Analytics & Progress Tracking
 - `POST /api/analytics/event` — log scene views, quiz attempts, discussion joins
