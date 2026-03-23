@@ -4,6 +4,20 @@
 
 ### New Features
 
+#### Organization Mode (Multi-User Platform)
+- Full multi-user deployment with PostgreSQL database (Prisma ORM)
+- NextAuth.js v5 authentication: email/password + Google/GitHub OAuth
+- Role system: Super Admin, Admin, Teacher, Student
+- First user auto-promoted to Super Admin with auto-created organization
+- Invitation system: email-based, shareable codes, CSV bulk upload (up to 100 at once)
+- Admin panel with sidebar navigation: Dashboard, Users, Invitations, Branding
+- Dashboard: stat cards for users, classrooms, pending invitations
+- Users page: full user table with role badges and join dates
+- Branding page: org name, logo URL, primary color picker with presets, favicon, live preview
+- Middleware auth: Organization mode requires login, checks NextAuth session tokens
+- Registration: invitation-only when org exists, open for first user
+- Prisma schema: User, Organization, Invitation, Classroom, Account, Session, VerificationToken
+
 #### Installation Setup Wizard
 - Beautiful first-run wizard at `/setup` with two deployment modes
 - **Personal Mode** (ready now): Zero config, browser-based storage, single user — works immediately
