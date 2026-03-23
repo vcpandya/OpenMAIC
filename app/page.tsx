@@ -58,7 +58,7 @@ type ExplanationDepth = 'eli5' | 'standard' | 'pro';
 interface FormState {
   pdfFile: File | null;
   requirement: string;
-  language: 'zh-CN' | 'en-US';
+  language: string;
   webSearch: boolean;
   explanationDepth: ExplanationDepth;
 }
@@ -105,11 +105,17 @@ function HomePage() {
       const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
       const updates: Partial<FormState> = {};
       if (savedWebSearch === 'true') updates.webSearch = true;
-      if (savedLanguage === 'zh-CN' || savedLanguage === 'en-US') {
+      if (savedLanguage) {
         updates.language = savedLanguage;
       } else {
-        const detected = navigator.language?.startsWith('zh') ? 'zh-CN' : 'en-US';
-        updates.language = detected;
+        // Auto-detect from browser language
+        const browserLang = navigator.language || 'en-US';
+        const langMap: Record<string, string> = {
+          zh: 'zh-CN', en: 'en-US', es: 'es', fr: 'fr', de: 'de',
+          ja: 'ja', ko: 'ko', pt: 'pt-BR', ru: 'ru', ar: 'ar', hi: 'hi', it: 'it',
+        };
+        const prefix = browserLang.split('-')[0];
+        updates.language = langMap[prefix] || 'en-US';
       }
       if (Object.keys(updates).length > 0) {
         setForm((prev) => ({ ...prev, ...updates }));
@@ -257,7 +263,7 @@ function HomePage() {
       const userProfile = useUserProfileStore.getState();
       const requirements: UserRequirements = {
         requirement: form.requirement,
-        language: form.language,
+        language: form.language as import('@/lib/types/generation').GenerationLanguage,
         userNickname: userProfile.nickname || undefined,
         userBio: userProfile.bio || undefined,
         userBackground: userProfile.background || undefined,

@@ -20,6 +20,7 @@ import { WEB_SEARCH_PROVIDERS } from '@/lib/web-search/constants';
 import type { WebSearchProviderId } from '@/lib/web-search/types';
 import type { ProviderId } from '@/lib/ai/providers';
 import type { SettingsSection } from '@/lib/types/settings';
+import { GENERATION_LANGUAGES } from '@/lib/types/generation';
 import { MediaPopover } from '@/components/generation/media-popover';
 
 // ─── Constants ───────────────────────────────────────────────
@@ -30,8 +31,8 @@ const MAX_PDF_SIZE_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
 type ExplanationDepth = 'eli5' | 'standard' | 'pro';
 
 export interface GenerationToolbarProps {
-  language: 'zh-CN' | 'en-US';
-  onLanguageChange: (lang: 'zh-CN' | 'en-US') => void;
+  language: string;
+  onLanguageChange: (lang: string) => void;
   webSearch: boolean;
   onWebSearchChange: (v: boolean) => void;
   onSettingsOpen: (section?: SettingsSection) => void;
@@ -390,19 +391,33 @@ export function GenerationToolbar({
         </Tooltip>
       )}
 
-      {/* ── Language pill ── */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={() => onLanguageChange(language === 'zh-CN' ? 'en-US' : 'zh-CN')}
-            className={pillMuted}
-          >
+      {/* ── Language selector ── */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <button className={pillMuted}>
             <Globe className="size-3.5" />
-            <span>{language === 'zh-CN' ? '中文' : 'EN'}</span>
+            <span>{GENERATION_LANGUAGES.find((l) => l.id === language)?.label || language}</span>
           </button>
-        </TooltipTrigger>
-        <TooltipContent>{t('toolbar.languageHint')}</TooltipContent>
-      </Tooltip>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-48 p-1.5 max-h-[280px] overflow-y-auto">
+          {GENERATION_LANGUAGES.map((lang) => (
+            <button
+              key={lang.id}
+              onClick={() => onLanguageChange(lang.id)}
+              className={cn(
+                'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors text-left',
+                language === lang.id
+                  ? 'bg-primary/10 text-primary font-medium'
+                  : 'hover:bg-muted/50 text-foreground',
+              )}
+            >
+              <span className="text-base leading-none">{lang.flag}</span>
+              <span className="flex-1 truncate">{lang.label}</span>
+              {language === lang.id && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+            </button>
+          ))}
+        </PopoverContent>
+      </Popover>
 
       {/* ── Separator ── */}
       <div className="w-px h-4 bg-border/60 mx-1" />

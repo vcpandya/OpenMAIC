@@ -64,9 +64,30 @@ export interface UploadedDocument {
  */
 export type ExplanationDepth = 'eli5' | 'standard' | 'pro';
 
+/** Supported content generation languages */
+export type GenerationLanguage =
+  | 'zh-CN' | 'en-US' | 'es' | 'fr' | 'de' | 'ja' | 'ko'
+  | 'pt-BR' | 'ru' | 'ar' | 'hi' | 'it';
+
+/** Language display metadata */
+export const GENERATION_LANGUAGES: { id: GenerationLanguage; label: string; flag: string }[] = [
+  { id: 'en-US', label: 'English', flag: '🇺🇸' },
+  { id: 'zh-CN', label: '中文', flag: '🇨🇳' },
+  { id: 'es', label: 'Español', flag: '🇪🇸' },
+  { id: 'fr', label: 'Français', flag: '🇫🇷' },
+  { id: 'de', label: 'Deutsch', flag: '🇩🇪' },
+  { id: 'ja', label: '日本語', flag: '🇯🇵' },
+  { id: 'ko', label: '한국어', flag: '🇰🇷' },
+  { id: 'pt-BR', label: 'Português', flag: '🇧🇷' },
+  { id: 'ru', label: 'Русский', flag: '🇷🇺' },
+  { id: 'ar', label: 'العربية', flag: '🇸🇦' },
+  { id: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
+  { id: 'it', label: 'Italiano', flag: '🇮🇹' },
+];
+
 export interface UserRequirements {
   requirement: string; // Single free-form text for all user input
-  language: 'zh-CN' | 'en-US'; // Course language - critical for generation
+  language: GenerationLanguage; // Course language - critical for generation
   userNickname?: string; // Student nickname for personalization
   userBio?: string; // Student background for personalization
   userBackground?: string; // Professional/educational background
@@ -105,7 +126,7 @@ export interface SceneOutline {
   teachingObjective?: string;
   estimatedDuration?: number; // seconds
   order: number;
-  language?: 'zh-CN' | 'en-US'; // Generation language (inherited from requirements)
+  language?: GenerationLanguage; // Generation language (inherited from requirements)
   explanationDepth?: ExplanationDepth; // Content depth (inherited from requirements)
   // Suggested image IDs (from PDF-extracted images)
   suggestedImageIds?: string[]; // e.g., ["img_1", "img_3"]
@@ -130,7 +151,7 @@ export interface SceneOutline {
     projectDescription: string;
     targetSkills: string[];
     issueCount?: number;
-    language: 'zh-CN' | 'en-US';
+    language: GenerationLanguage;
   };
 }
 

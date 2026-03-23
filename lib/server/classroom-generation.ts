@@ -26,7 +26,7 @@ import {
   replaceMediaPlaceholders,
   generateTTSForClassroom,
 } from '@/lib/server/classroom-media-generation';
-import type { UserRequirements } from '@/lib/types/generation';
+import type { UserRequirements, GenerationLanguage } from '@/lib/types/generation';
 import type { Scene, Stage, RecommendedTool } from '@/lib/types/stage';
 
 const log = createLogger('Classroom');
@@ -97,8 +97,10 @@ function createInMemoryStore(stage: Stage): StageStore {
   };
 }
 
-function normalizeLanguage(language?: string): 'zh-CN' | 'en-US' {
-  return language === 'en-US' ? 'en-US' : 'zh-CN';
+function normalizeLanguage(language?: string): GenerationLanguage {
+  // Accept any valid GenerationLanguage, default to en-US
+  const valid = ['zh-CN', 'en-US', 'es', 'fr', 'de', 'ja', 'ko', 'pt-BR', 'ru', 'ar', 'hi', 'it'];
+  return valid.includes(language || '') ? (language as GenerationLanguage) : 'en-US';
 }
 
 function stripCodeFences(text: string): string {

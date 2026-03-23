@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1] - 2026-03-23
+
+### New Features
+
+#### Multi-Language Content Generation
+- Expanded from 2 languages (zh-CN, en-US) to 12 languages: English, Chinese, Spanish, French, German, Japanese, Korean, Portuguese (BR), Russian, Arabic, Hindi, Italian
+- Language selector upgraded from toggle to popover dropdown with flag icons
+- Auto-detects browser language on first visit
+- All content (slides, quizzes, interactive activities, PBL projects, discussions) generated in the selected language
+
+---
+
 ## [0.2.0] - 2026-03-23
 
 ### Security
