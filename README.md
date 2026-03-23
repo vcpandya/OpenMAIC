@@ -376,7 +376,7 @@ Admins or users create **learning segments** (topic areas like "Machine Learning
 
 1. Uses [Jina AI](https://jina.ai/) to research trending content per segment
 2. Curates the top findings with summaries and source links
-3. Can auto-generate classrooms from the research (coming soon: scheduled daily cron)
+3. Can auto-generate classrooms from the research via manual trigger or API
 4. Delivers a daily digest of fresh learning material
 
 ### Professional Slide Layout Engine

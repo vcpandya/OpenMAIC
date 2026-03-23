@@ -1,13 +1,16 @@
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutDashboard, Users, Mail, Palette, ArrowLeft } from 'lucide-react';
+import { LayoutDashboard, Users, Mail, Palette, ArrowLeft, BarChart3, Bot, BookOpen } from 'lucide-react';
 import { BRAND } from '@/lib/branding';
 
 const NAV_ITEMS = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/invitations', label: 'Invitations', icon: Mail },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/admin/segments', label: 'Auto-Learning', icon: BookOpen },
+  { href: '/admin/integrations', label: 'Integrations', icon: Bot },
   { href: '/admin/branding', label: 'Branding', icon: Palette },
 ];
 

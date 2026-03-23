@@ -65,8 +65,8 @@ Major release: Learning intelligence (analytics, spaced repetition, adaptive dif
 
 #### Installation Setup Wizard
 - Beautiful first-run wizard at `/setup` with two deployment modes
-- **Personal Mode** (ready now): Zero config, browser-based storage, single user — works immediately
-- **Organization Mode** (coming soon): Multi-user with PostgreSQL, auth, admin panel, invitations, white-labeling
+- **Personal Mode**: Zero config, browser-based storage, single user — works immediately
+- **Organization Mode**: Multi-user with PostgreSQL, auth, admin panel, invitations, white-labeling
 - Cookie-based setup detection via middleware — redirects to wizard on first visit
 - Skip wizard entirely with `DEPLOYMENT_MODE=personal` env var for automated deployments
 - Setup state persisted to `data/setup.json` for server-side reference
