@@ -213,12 +213,11 @@ export function parseStructuredChunk(chunk: string, state: ParserState): ParseRe
       const remaining = content.slice(state.lastPartialTextLength);
       if (remaining) {
         result.textChunks.push(remaining);
+        result.ordered.push({
+          type: 'text',
+          index: result.textChunks.length - 1,
+        });
       }
-      // Use per-call array index for consistency with emitItem fix
-      result.ordered.push({
-        type: 'text',
-        index: result.textChunks.length - 1,
-      });
       textSegmentIndex++;
       state.lastPartialTextLength = 0;
       continue;

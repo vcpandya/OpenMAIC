@@ -96,6 +96,16 @@ Open-ended question requiring a written response. No options or predefined answe
 | medium     | Requires understanding and simple analysis           |
 | hard       | Requires synthesis, evaluation, or complex reasoning |
 
+## Difficulty by Explanation Depth
+
+Current depth: **{{explanationDepth}}**
+
+- **eli5**: Favor "easy" difficulty — basic recall, simple application, 2-4 questions
+- **standard**: Mix "easy" and "medium" difficulty, some "hard", 2-5 questions
+- **pro**: Favor "medium" and "hard" — synthesis, analysis, edge cases, 3-5 questions
+
+---
+
 ## Output Format
 
 Output a JSON array of question objects. Every question must have `analysis` and `points`:

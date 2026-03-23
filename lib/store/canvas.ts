@@ -103,6 +103,10 @@ interface CanvasState {
   whiteboardOpen: boolean; // Whether whiteboard is open
   whiteboardClearing: boolean; // Whiteboard clear animation in progress
 
+  // ===== Slide entrance animations =====
+  revealedElementIds: string[]; // Element IDs revealed during animated playback
+  slideAnimationsEnabled: boolean; // Whether progressive reveal is active
+
   // ===== Other =====
   thumbnailsFocus: boolean; // Whether left thumbnail area is focused
   editorAreaFocus: boolean; // Whether editor area is focused
@@ -161,6 +165,12 @@ interface CanvasState {
   setEditorAreaFocus: (focus: boolean) => void;
   setDisableHotkeysState: (disable: boolean) => void;
   setSelectedTableCells: (cells: string[]) => void;
+
+  // ----- Slide entrance animations -----
+  revealElement: (elementId: string) => void;
+  revealAllElements: (elementIds: string[]) => void;
+  resetRevealedElements: () => void;
+  setSlideAnimationsEnabled: (enabled: boolean) => void;
 
   // ----- Teaching features -----
   setSpotlight: (elementId: string, options?: SpotlightOptions) => void;
@@ -233,6 +243,10 @@ const initialState = {
   thumbnailsFocus: false,
   disableHotkeys: false,
   selectedTableCells: [],
+
+  // Slide entrance animations
+  revealedElementIds: [] as string[],
+  slideAnimationsEnabled: true,
 
   // Teaching features
   spotlightElementId: '',
@@ -359,7 +373,7 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
       spotlightMode: 'pixel',
       spotlightOptions: {
         radius: 200,
-        dimness: 0.7,
+        dimness: 0.15,
         transition: 300,
         ...options,
       },
@@ -373,7 +387,7 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
       spotlightMode: 'percentage',
       spotlightPercentageGeometry: geometry,
       spotlightOptions: {
-        dimness: 0.7,
+        dimness: 0.15,
         transition: 300,
         ...options,
       },
@@ -437,6 +451,27 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
     set({
       zoomTarget: null,
     });
+  },
+
+  // ===== Slide entrance animations =====
+
+  revealElement: (elementId) => {
+    const current = get().revealedElementIds;
+    if (!current.includes(elementId)) {
+      set({ revealedElementIds: [...current, elementId] });
+    }
+  },
+
+  revealAllElements: (elementIds) => {
+    set({ revealedElementIds: elementIds });
+  },
+
+  resetRevealedElements: () => {
+    set({ revealedElementIds: [] });
+  },
+
+  setSlideAnimationsEnabled: (enabled) => {
+    set({ slideAnimationsEnabled: enabled });
   },
 
   clearAllEffects: () => {

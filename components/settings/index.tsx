@@ -658,12 +658,12 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="h-[85vh] p-0 gap-0 block" showCloseButton={false}>
+      <DialogContent className="h-[100vh] sm:h-[85vh] max-w-[100vw] sm:max-w-[95%] p-0 gap-0 block" showCloseButton={false}>
         <DialogTitle className="sr-only">{t('settings.title')}</DialogTitle>
         <DialogDescription className="sr-only">{t('settings.description')}</DialogDescription>
         <div className="flex h-full overflow-hidden">
           {/* Left Sidebar - Navigation */}
-          <div className="flex-shrink-0 bg-muted/30 p-3 space-y-1" style={{ width: sidebarWidth }}>
+          <div className="hidden sm:flex flex-shrink-0 bg-muted/30 p-3 space-y-1 flex-col" style={{ width: sidebarWidth }}>
             <button
               onClick={() => setActiveSection('providers')}
               className={cn(

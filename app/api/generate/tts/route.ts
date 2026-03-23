@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     }
 
     const clientBaseUrl = ttsBaseUrl || undefined;
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+    if (clientBaseUrl) {
       const ssrfError = validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
     return apiError(
       'GENERATION_FAILED',
       500,
-      error instanceof Error ? error.message : String(error),
+      'Text-to-speech generation failed',
     );
   }
 }

@@ -184,6 +184,7 @@ export async function POST(req: NextRequest) {
       researchContext: researchContext || (requirements.language === 'zh-CN' ? '无' : 'None'),
       mediaGenerationPolicy,
       teacherContext,
+      explanationDepth: requirements.explanationDepth || 'standard',
     });
 
     if (!prompts) {

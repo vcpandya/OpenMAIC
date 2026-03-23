@@ -268,7 +268,8 @@ export class StreamBuffer {
 
   /** Start the tick loop. Idempotent — calling twice is safe. */
   start(): void {
-    if (this._disposed || this.timer) return;
+    if (this._disposed) return;
+    if (this.timer) clearInterval(this.timer);
     this.timer = setInterval(() => this.tick(), this.tickMs);
   }
 

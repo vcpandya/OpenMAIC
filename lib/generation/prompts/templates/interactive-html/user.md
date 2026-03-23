@@ -33,6 +33,8 @@ The following constraints must be strictly obeyed in all JavaScript logic and vi
 
 ---
 
+{{userProfile}}
+
 ## Requirements
 
 1. Complete self-contained HTML5 document

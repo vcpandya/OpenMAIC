@@ -69,6 +69,6 @@ export async function POST(req: NextRequest) {
     return apiSuccess({ message: result.text, agentName: agent.name });
   } catch (error) {
     log.error('Error:', error);
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
+    return apiError('INTERNAL_ERROR', 500, 'PBL chat request failed');
   }
 }

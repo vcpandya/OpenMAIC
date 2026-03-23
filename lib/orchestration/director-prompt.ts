@@ -90,13 +90,15 @@ This is a student-initiated discussion, not a Q&A session.\n`
   // Build whiteboard state section for director awareness
   const whiteboardSection = buildWhiteboardStateForDirector(whiteboardLedger);
 
-  // Build student profile section for director awareness
+  // Build student profile section for director awareness (sanitized)
+  const sanitize = (v: string, max = 200) =>
+    v.slice(0, max).replace(/[`#]/g, '').replace(/\n{2,}/g, '\n').trim();
   const studentProfileSection =
     userProfile?.nickname || userProfile?.bio
       ? `
 # Student Profile
-Student name: ${userProfile.nickname || 'Unknown'}
-${userProfile.bio ? `Background: ${userProfile.bio}` : ''}
+Student name: ${sanitize(userProfile.nickname || 'Unknown', 50)}
+${userProfile.bio ? `Background: ${sanitize(userProfile.bio)}` : ''}
 `
       : '';
 

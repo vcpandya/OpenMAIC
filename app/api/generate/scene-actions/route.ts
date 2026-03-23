@@ -153,6 +153,6 @@ export async function POST(req: NextRequest) {
     return apiSuccess({ scene, previousSpeeches: outputPreviousSpeeches });
   } catch (error) {
     log.error('Scene actions generation error:', error);
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
+    return apiError('INTERNAL_ERROR', 500, 'Scene action generation failed');
   }
 }

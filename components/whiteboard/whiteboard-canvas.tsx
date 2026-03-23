@@ -82,7 +82,15 @@ function getWhiteboardElementBounds(element: PPTElement): ElementBounds {
     return getLineBounds(element);
   }
 
-  return getElementRange(element);
+  const range = getElementRange(element);
+  // Add padding for element strokes/borders that extend beyond geometric bounds
+  const strokePad = 4;
+  return {
+    minX: range.minX - strokePad,
+    minY: range.minY - strokePad,
+    maxX: range.maxX + strokePad,
+    maxY: range.maxY + strokePad,
+  };
 }
 
 function AnimatedElement({
@@ -98,11 +106,16 @@ function AnimatedElement({
 }) {
   const clearDelay = isClearing ? (totalElements - 1 - index) * 0.055 : 0;
   const clearRotate = isClearing ? (index % 2 === 0 ? 1 : -1) * (2 + index * 0.4) : 0;
+  const isTextElement = element.type === 'text';
 
   return (
     <motion.div
       layout={false}
-      initial={{ opacity: 0, scale: 0.92, y: 8, filter: 'blur(4px)' }}
+      initial={
+        isTextElement
+          ? { opacity: 0, clipPath: 'inset(0 100% 0 0)' }
+          : { opacity: 0, scale: 0.92, y: 8, filter: 'blur(4px)' }
+      }
       animate={
         isClearing
           ? {
@@ -117,18 +130,28 @@ function AnimatedElement({
                 ease: [0.5, 0, 1, 0.6],
               },
             }
-          : {
-              opacity: 1,
-              scale: 1,
-              y: 0,
-              rotate: 0,
-              filter: 'blur(0px)',
-              transition: {
-                duration: 0.45,
-                ease: [0.16, 1, 0.3, 1],
-                delay: index * 0.05,
-              },
-            }
+          : isTextElement
+            ? {
+                opacity: 1,
+                clipPath: 'inset(0 0% 0 0)',
+                transition: {
+                  duration: 0.8,
+                  delay: index * 0.05,
+                  ease: [0.25, 0.1, 0.25, 1],
+                },
+              }
+            : {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                rotate: 0,
+                filter: 'blur(0px)',
+                transition: {
+                  duration: 0.45,
+                  ease: [0.16, 1, 0.3, 1],
+                  delay: index * 0.05,
+                },
+              }
       }
       exit={{
         opacity: 0,
@@ -484,7 +507,7 @@ export function WhiteboardCanvas() {
 
   const canvasWidth = 1000;
   const canvasHeight = 562.5;
-  const padding = 24;
+  const padding = 32;
 
   const updateContainerScale = useCallback(() => {
     const container = containerRef.current;

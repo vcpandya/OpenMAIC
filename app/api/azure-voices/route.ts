@@ -59,8 +59,7 @@ export async function POST(req: NextRequest) {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      'Failed to fetch voices',
-      error instanceof Error ? error.message : 'Unknown error',
+      'Failed to fetch voice list',
     );
   }
 }

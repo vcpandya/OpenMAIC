@@ -81,7 +81,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
 
   return (
     <>
-      <header className="h-20 px-8 flex items-center justify-between z-10 bg-transparent gap-4">
+      <header className="h-14 md:h-20 px-3 sm:px-5 md:px-8 flex items-center justify-between z-10 bg-transparent gap-2 md:gap-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <button
             onClick={() => router.push('/')}
@@ -116,7 +116,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
               {locale === 'zh-CN' ? 'CN' : 'EN'}
             </button>
             {languageOpen && (
-              <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[120px]">
+              <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[120px] max-w-[calc(100vw-2rem)]">
                 <button
                   onClick={() => {
                     setLocale('zh-CN');
@@ -163,7 +163,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
               {theme === 'system' && <Monitor className="w-4 h-4" />}
             </button>
             {themeOpen && (
-              <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[140px]">
+              <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden z-50 min-w-[140px] max-w-[calc(100vw-2rem)]">
                 <button
                   onClick={() => {
                     setTheme('light');

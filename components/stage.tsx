@@ -7,6 +7,8 @@ import { useCanvasStore } from '@/lib/store/canvas';
 import { useSettingsStore } from '@/lib/store/settings';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { SceneSidebar } from './stage/scene-sidebar';
+import { SessionJourney } from '@/components/stage/session-journey';
+import { RecommendedTools } from '@/components/stage/recommended-tools';
 import { Header } from './header';
 import { CanvasArea } from '@/components/canvas/canvas-area';
 import { Roundtable } from '@/components/roundtable';
@@ -138,6 +140,18 @@ export function Stage({
   const autoStartRef = useRef(false);
   // Discussion buffer-level pause state (distinct from soft-pause which aborts SSE)
   const [isDiscussionPaused, setIsDiscussionPaused] = useState(false);
+
+  // Expandable discussion section state
+  const [discussionExpanded, setDiscussionExpanded] = useState(false);
+
+  // Auto-expand when live, auto-collapse when playing lecture
+  useEffect(() => {
+    if (engineMode === 'live') {
+      setDiscussionExpanded(true);
+    } else if (engineMode === 'playing') {
+      setDiscussionExpanded(false);
+    }
+  }, [engineMode]);
 
   /**
    * Soft-pause: interrupt current agent stream but keep the session active.
@@ -668,16 +682,17 @@ export function Stage({
     : null;
 
   // Calculate scene viewer height (subtract Header's 80px height)
+  const roundtableHeight = discussionExpanded ? 400 : 192;
   const sceneViewerHeight = (() => {
     const headerHeight = 80; // Header h-20 = 80px
     if (mode === 'playback') {
-      return `calc(100% - ${headerHeight + 192}px)`; // Header + Roundtable
+      return `calc(100% - ${headerHeight + roundtableHeight}px)`; // Header + Roundtable
     }
     return `calc(100% - ${headerHeight}px)`;
   })();
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex-1 flex overflow-hidden bg-gray-50 dark:bg-gray-900 relative">
       {/* Scene Sidebar */}
       <SceneSidebar
         collapsed={sidebarCollapsed}
@@ -691,9 +706,16 @@ export function Stage({
         {/* Header */}
         <Header currentSceneTitle={currentScene?.title || ''} />
 
+        {/* Session Journey — lesson roadmap breadcrumb */}
+        <SessionJourney
+          scenes={scenes}
+          currentSceneId={currentSceneId}
+          onSceneSelect={gatedSceneSwitch}
+        />
+
         {/* Canvas Area */}
         <div
-          className="overflow-hidden relative flex-1 min-h-0 isolate"
+          className="overflow-hidden relative flex-1 min-h-0 isolate transition-all duration-500 ease-out"
           style={{
             height: sceneViewerHeight,
           }}
@@ -738,6 +760,8 @@ export function Stage({
         {/* Roundtable Area */}
         {mode === 'playback' && (
           <Roundtable
+            discussionExpanded={discussionExpanded}
+            onToggleExpanded={() => setDiscussionExpanded(!discussionExpanded)}
             mode={mode}
             initialParticipants={participants}
             playbackView={playbackView}
@@ -838,6 +862,9 @@ export function Stage({
             onWhiteboardClose={handleWhiteboardToggle}
           />
         )}
+
+        {/* Recommended Tools */}
+        <RecommendedTools />
       </div>
 
       {/* Chat Area */}

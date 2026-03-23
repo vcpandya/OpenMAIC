@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
-import { Bot, Check, ChevronLeft, Globe, Paperclip, FileText, X, Globe2 } from 'lucide-react';
+import { Bot, Check, ChevronLeft, Globe, Paperclip, FileText, X, Globe2, GraduationCap } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
@@ -27,6 +27,8 @@ const MAX_PDF_SIZE_MB = 50;
 const MAX_PDF_SIZE_BYTES = MAX_PDF_SIZE_MB * 1024 * 1024;
 
 // ─── Types ───────────────────────────────────────────────────
+type ExplanationDepth = 'eli5' | 'standard' | 'pro';
+
 export interface GenerationToolbarProps {
   language: 'zh-CN' | 'en-US';
   onLanguageChange: (lang: 'zh-CN' | 'en-US') => void;
@@ -37,6 +39,9 @@ export interface GenerationToolbarProps {
   pdfFile: File | null;
   onPdfFileChange: (file: File | null) => void;
   onPdfError: (error: string | null) => void;
+  // Explanation depth
+  explanationDepth?: ExplanationDepth;
+  onExplanationDepthChange?: (depth: ExplanationDepth) => void;
 }
 
 // ─── Component ───────────────────────────────────────────────
@@ -49,6 +54,8 @@ export function GenerationToolbar({
   pdfFile,
   onPdfFileChange,
   onPdfError,
+  explanationDepth = 'standard',
+  onExplanationDepthChange,
 }: GenerationToolbarProps) {
   const { t } = useI18n();
   const currentProviderId = useSettingsStore((s) => s.providerId);
@@ -354,6 +361,32 @@ export function GenerationToolbar({
             </button>
           </TooltipTrigger>
           <TooltipContent>{t('toolbar.webSearchNoProvider')}</TooltipContent>
+        </Tooltip>
+      )}
+
+      {/* ── Explanation Depth ── */}
+      {onExplanationDepthChange && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => {
+                const cycle: ExplanationDepth[] = ['eli5', 'standard', 'pro'];
+                const next = cycle[(cycle.indexOf(explanationDepth) + 1) % cycle.length];
+                onExplanationDepthChange(next);
+              }}
+              className={explanationDepth !== 'standard' ? pillActive : pillMuted}
+            >
+              <GraduationCap className="size-3.5" />
+              <span>
+                {explanationDepth === 'eli5' ? 'ELI5' : explanationDepth === 'pro' ? 'Pro' : 'Standard'}
+              </span>
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            {language === 'zh-CN'
+              ? `内容深度：${explanationDepth === 'eli5' ? '入门' : explanationDepth === 'pro' ? '专业' : '标准'}`
+              : `Depth: ${explanationDepth === 'eli5' ? 'Beginner' : explanationDepth === 'pro' ? 'Advanced' : 'Standard'}`}
+          </TooltipContent>
         </Tooltip>
       )}
 

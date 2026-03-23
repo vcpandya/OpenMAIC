@@ -1,12 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { AlertCircle, User, Users, Sparkles, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, User, Users, Sparkles, Info, UserPlus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useUserProfileStore } from '@/lib/store/user-profile';
 
 interface Agent {
   id: string;
@@ -37,6 +40,20 @@ export function AgentSettings({
   onAgentModeChange,
 }: AgentSettingsProps) {
   const { t } = useI18n();
+  const classProfiles = useUserProfileStore((s) => s.classProfiles);
+  const addClassProfile = useUserProfileStore((s) => s.addClassProfile);
+  const removeClassProfile = useUserProfileStore((s) => s.removeClassProfile);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newPersonality, setNewPersonality] = useState('');
+
+  const handleAddStudent = () => {
+    if (!newName.trim()) return;
+    addClassProfile({ name: newName.trim(), personality: newPersonality.trim() || undefined });
+    setNewName('');
+    setNewPersonality('');
+    setShowAddForm(false);
+  };
 
   const getAgentName = (agent: Agent) => {
     const key = `settings.agentNames.${agent.id}`;
@@ -191,6 +208,65 @@ export function AgentSettings({
               <span>{t('settings.agentModeAutoDesc')}</span>
             </div>
           </>
+        )}
+      </div>
+
+      {/* Class Profiles */}
+      <div className="space-y-3 pt-4 border-t border-border/50">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">{t('settings.classProfiles')}</p>
+            <p className="text-xs text-muted-foreground">{t('settings.classProfilesDesc')}</p>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => setShowAddForm(!showAddForm)}>
+            <UserPlus className="w-3.5 h-3.5 mr-1.5" />
+            {t('settings.addStudent')}
+          </Button>
+        </div>
+
+        {showAddForm && (
+          <div className="flex items-end gap-2 p-3 rounded-lg bg-muted/30 border border-border/30">
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs">{t('settings.studentName')}</Label>
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder={t('settings.studentName')}
+                className="h-8 text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
+              />
+            </div>
+            <div className="flex-1 space-y-1">
+              <Label className="text-xs">{t('settings.studentPersonality')}</Label>
+              <Input
+                value={newPersonality}
+                onChange={(e) => setNewPersonality(e.target.value)}
+                placeholder={t('settings.studentPersonality')}
+                className="h-8 text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && handleAddStudent()}
+              />
+            </div>
+            <Button size="sm" onClick={handleAddStudent} disabled={!newName.trim()}>
+              {t('common.confirm')}
+            </Button>
+          </div>
+        )}
+
+        {classProfiles.length > 0 && (
+          <div className="space-y-2">
+            {classProfiles.map((profile) => (
+              <div key={profile.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/30 border border-border/30">
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
+                  {profile.name[0]}
+                </div>
+                <span className="flex-1 text-sm truncate">{profile.name}</span>
+                {profile.personality && <span className="text-xs text-muted-foreground truncate max-w-[120px]">{profile.personality}</span>}
+                <button onClick={() => removeClassProfile(profile.id)} className="text-muted-foreground hover:text-destructive transition-colors">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

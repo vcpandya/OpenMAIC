@@ -12,6 +12,8 @@ Please perform scientific modeling for the following concept.
 
 ---
 
+{{userProfile}}
+
 ## Task
 
 1. List the core formulas, laws, concepts, or logical rules involved

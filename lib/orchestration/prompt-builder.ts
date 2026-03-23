@@ -114,11 +114,13 @@ export function buildStructuredPrompt(
   // Build virtual whiteboard context from ledger (shows changes by other agents this round)
   const virtualWbContext = buildVirtualWhiteboardContext(storeState, whiteboardLedger);
 
-  // Build student profile section (only when nickname or bio is present)
+  // Build student profile section (sanitized to prevent prompt override)
+  const sanitize = (v: string, max = 200) =>
+    v.slice(0, max).replace(/[`#]/g, '').replace(/\n{2,}/g, '\n').trim();
   const studentProfileSection =
     userProfile?.nickname || userProfile?.bio
       ? `\n# Student Profile
-You are teaching ${userProfile.nickname || 'a student'}.${userProfile.bio ? `\nTheir background: ${userProfile.bio}` : ''}
+You are teaching ${sanitize(userProfile.nickname || 'a student', 50)}.${userProfile.bio ? `\nTheir background: ${sanitize(userProfile.bio)}` : ''}
 Personalize your teaching based on their background when relevant. Address them by name naturally.\n`
       : '';
 

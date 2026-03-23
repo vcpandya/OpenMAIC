@@ -153,6 +153,12 @@ export interface PlayVideoAction extends ActionBase {
   elementId: string;
 }
 
+/** Reveal Element — show a hidden element with entrance animation */
+export interface RevealElementAction extends ActionBase {
+  type: 'reveal_element';
+  elementId: string;
+}
+
 /** Discussion — trigger a roundtable discussion */
 export interface DiscussionAction extends ActionBase {
   type: 'discussion';
@@ -178,15 +184,16 @@ export type Action =
   | WbClearAction
   | WbDeleteAction
   | WbCloseAction
+  | RevealElementAction
   | DiscussionAction;
 
 export type ActionType = Action['type'];
 
 /** Action types that fire immediately without blocking */
-export const FIRE_AND_FORGET_ACTIONS: ActionType[] = ['spotlight', 'laser'];
+export const FIRE_AND_FORGET_ACTIONS: ActionType[] = ['spotlight', 'laser', 'reveal_element'];
 
 /** Action types that only work on slide scenes (require slide canvas elements) */
-export const SLIDE_ONLY_ACTIONS: ActionType[] = ['spotlight', 'laser'];
+export const SLIDE_ONLY_ACTIONS: ActionType[] = ['spotlight', 'laser', 'reveal_element'];
 
 /** Action types that must complete before the next action runs */
 export const SYNC_ACTIONS: ActionType[] = [

@@ -53,11 +53,14 @@ const WEB_SEARCH_STORAGE_KEY = 'webSearchEnabled';
 const LANGUAGE_STORAGE_KEY = 'generationLanguage';
 const RECENT_OPEN_STORAGE_KEY = 'recentClassroomsOpen';
 
+type ExplanationDepth = 'eli5' | 'standard' | 'pro';
+
 interface FormState {
   pdfFile: File | null;
   requirement: string;
   language: 'zh-CN' | 'en-US';
   webSearch: boolean;
+  explanationDepth: ExplanationDepth;
 }
 
 const initialFormState: FormState = {
@@ -65,6 +68,7 @@ const initialFormState: FormState = {
   requirement: '',
   language: 'zh-CN',
   webSearch: false,
+  explanationDepth: 'standard',
 };
 
 function HomePage() {
@@ -256,7 +260,10 @@ function HomePage() {
         language: form.language,
         userNickname: userProfile.nickname || undefined,
         userBio: userProfile.bio || undefined,
+        userBackground: userProfile.background || undefined,
+        userCareerAspiration: userProfile.careerAspiration || undefined,
         webSearch: form.webSearch || undefined,
+        explanationDepth: form.explanationDepth,
       };
 
       let pdfStorageKey: string | undefined;
@@ -552,6 +559,8 @@ function HomePage() {
                   onLanguageChange={(lang) => updateForm('language', lang)}
                   webSearch={form.webSearch}
                   onWebSearchChange={(v) => updateForm('webSearch', v)}
+                  explanationDepth={form.explanationDepth}
+                  onExplanationDepthChange={(d) => updateForm('explanationDepth', d)}
                   onSettingsOpen={(section) => {
                     setSettingsSection(section);
                     setSettingsOpen(true);

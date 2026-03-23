@@ -82,6 +82,9 @@ export class PlaybackEngine {
   private browserTTSChunkIndex: number = 0; // current chunk being spoken
   private browserTTSPausedChunks: string[] = []; // remaining chunks saved on pause (for cancel+re-speak)
   private speechTimerRemaining: number = 0; // remaining ms (set on pause)
+  // Re-entry guard: prevents concurrent processNext() calls from skipping actions
+  private isProcessing: boolean = false;
+  private processNextQueued: boolean = false;
 
   constructor(
     scenes: Scene[],
@@ -234,6 +237,8 @@ export class PlaybackEngine {
     this.audioPlayer.stop();
     this.cancelBrowserTTS();
     this.actionEngine.clearEffects();
+    // Reveal all elements so user can review the full slide after stopping
+    this.revealAllCurrentElements();
     if (this.triggerDelayTimer) {
       clearTimeout(this.triggerDelayTimer);
       this.triggerDelayTimer = null;
@@ -394,23 +399,45 @@ export class PlaybackEngine {
     return null;
   }
 
+  /** Reveal all elements in the current scene (used on stop/complete) */
+  private revealAllCurrentElements(): void {
+    const scene = this.scenes[this.sceneIndex] ?? this.scenes[this.scenes.length - 1];
+    if (scene?.type === 'slide') {
+      const elements = (scene.content as { canvas: { elements: { id: string }[] } }).canvas?.elements;
+      if (elements) {
+        useCanvasStore.getState().revealAllElements(elements.map((e) => e.id));
+      }
+    }
+  }
+
   /**
    * Core processing loop: consume the next action.
    */
   private async processNext(): Promise<void> {
     if (this.mode !== 'playing') return;
 
+    // Re-entry guard: if already processing, queue and return
+    if (this.isProcessing) {
+      this.processNextQueued = true;
+      return;
+    }
+    this.isProcessing = true;
+
+    try {
     // Check for scene boundary (fire scene change callback at start of each new scene)
     if (this.actionIndex === 0 && this.sceneIndex < this.scenes.length) {
       const scene = this.scenes[this.sceneIndex];
       this.actionEngine.clearEffects();
+      // Reset entrance animation state for new scene
+      useCanvasStore.getState().resetRevealedElements();
       this.callbacks.onSceneChange?.(scene.id);
       this.callbacks.onSpeakerChange?.('teacher');
     }
 
     const current = this.getCurrentAction();
     if (!current) {
-      // All scenes complete
+      // All scenes complete — reveal all elements so user can review
+      this.revealAllCurrentElements();
       this.actionEngine.clearEffects();
       this.setMode('idle');
       this.callbacks.onComplete?.();
@@ -467,6 +494,8 @@ export class PlaybackEngine {
         this.audioPlayer
           .play(speechAction.audioId || '', speechAction.audioUrl)
           .then((audioStarted) => {
+            // Guard: user may have paused/stopped while audio was loading
+            if (this.mode !== 'playing') return;
             if (!audioStarted) {
               // No pre-generated audio — try browser-native TTS if selected
               const settings = useSettingsStore.getState();
@@ -484,7 +513,7 @@ export class PlaybackEngine {
           })
           .catch((err) => {
             log.error('TTS error:', err);
-            scheduleReadingTimer();
+            if (this.mode === 'playing') scheduleReadingTimer();
           });
         break;
       }
@@ -501,6 +530,13 @@ export class PlaybackEngine {
             : { color: action.color }),
         } as Effect);
         // Don't block — continue immediately
+        this.processNext();
+        break;
+      }
+
+      case 'reveal_element': {
+        // Fire-and-forget: reveal element with entrance animation
+        this.actionEngine.execute(action);
         this.processNext();
         break;
       }
@@ -550,6 +586,7 @@ export class PlaybackEngine {
       case 'wb_draw_table':
       case 'wb_clear':
       case 'wb_delete':
+      case 'wb_draw_line':
       case 'wb_close': {
         // Synchronous whiteboard actions — await completion, then continue
         await this.actionEngine.execute(action);
@@ -563,6 +600,15 @@ export class PlaybackEngine {
         // Unknown action, skip
         this.processNext();
         break;
+    }
+    } finally {
+      this.isProcessing = false;
+      // Drain queued call: if another callback triggered processNext during processing,
+      // run it now. At most one call is queued since all processNext calls are identical.
+      if (this.processNextQueued) {
+        this.processNextQueued = false;
+        this.processNext();
+      }
     }
   }
 

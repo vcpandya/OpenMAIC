@@ -13,6 +13,7 @@ import {
   Volume2,
   VolumeX,
   Repeat,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStageStore } from '@/lib/store';
@@ -46,11 +47,13 @@ export interface CanvasToolbarProps {
   readonly onToggleAutoPlay?: () => void;
   readonly playbackSpeed?: number;
   readonly onCycleSpeed?: () => void;
+  readonly slideAnimationsEnabled?: boolean;
+  readonly onToggleSlideAnimations?: () => void;
 }
 
 /* Compact control button */
 const ctrlBtn = cn(
-  'relative w-7 h-7 rounded-md flex items-center justify-center',
+  'relative w-9 h-9 md:w-7 md:h-7 rounded-md flex items-center justify-center',
   'transition-all duration-150 outline-none cursor-pointer',
   'hover:bg-gray-500/[0.08] dark:hover:bg-gray-400/[0.08] active:scale-90',
 );
@@ -102,6 +105,8 @@ export function CanvasToolbar({
   onToggleAutoPlay,
   playbackSpeed = 1,
   onCycleSpeed,
+  slideAnimationsEnabled = true,
+  onToggleSlideAnimations,
 }: CanvasToolbarProps) {
   const { t } = useI18n();
   const canGoPrev = currentSceneIndex > 0;
@@ -352,6 +357,32 @@ export function CanvasToolbar({
                 </TooltipTrigger>
                 <TooltipContent side="top" className="text-xs">
                   {autoPlayLecture ? t('roundtable.autoPlayOff') : t('roundtable.autoPlay')}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
+          {/* Slide animations toggle */}
+          {onToggleSlideAnimations && (
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={onToggleSlideAnimations}
+                    className={cn(
+                      ctrlBtn,
+                      'w-8 h-6',
+                      slideAnimationsEnabled
+                        ? 'text-violet-600 dark:text-violet-400'
+                        : 'text-gray-500 dark:text-gray-400',
+                    )}
+                    aria-label="Slide animations"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  {slideAnimationsEnabled ? t('roundtable.animationsOff') : t('roundtable.animationsOn')}
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

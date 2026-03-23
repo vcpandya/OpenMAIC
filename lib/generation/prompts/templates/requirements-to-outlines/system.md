@@ -33,6 +33,18 @@ Based on the user's free-form requirement text, automatically infer course detai
 
 ---
 
+## Explanation Depth
+
+Tailor the course to the specified explanation depth level:
+
+- **eli5**: Target complete beginners. Use simple analogies, everyday language, avoid jargon. Break concepts into smallest steps. More slides with shorter text (max 15 words per bullet). Focus on "what" and "why" before "how". Include more concrete examples than theory.
+- **standard**: Target general learners with some prerequisite knowledge. Balance accessibility and depth. Use appropriate terminology with brief explanations. Mix theory with real-world examples.
+- **pro**: Target advanced learners or professionals. Assume foundational knowledge. Use precise technical terminology. Focus on advanced applications, edge cases, and deeper analysis. Denser content permitted.
+
+Current depth: **{{explanationDepth}}**
+
+---
+
 ## Default Assumption Rules
 
 When user requirements don't specify, use these defaults:

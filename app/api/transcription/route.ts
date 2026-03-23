@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const effectiveProviderId = providerId || ('openai-whisper' as ASRProviderId);
 
     const clientBaseUrl = baseUrl || undefined;
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+    if (clientBaseUrl) {
       const ssrfError = validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);
@@ -44,6 +44,12 @@ export async function POST(req: NextRequest) {
         : resolveASRBaseUrl(effectiveProviderId, baseUrl || undefined),
     };
 
+    // Reject oversized files before reading into memory
+    const MAX_AUDIO_SIZE = 25 * 1024 * 1024; // 25MB
+    if (audioFile.size > MAX_AUDIO_SIZE) {
+      return apiError('INVALID_REQUEST', 413, 'Audio file exceeds maximum size of 25MB');
+    }
+
     // Convert audio file to buffer
     const arrayBuffer = await audioFile.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
@@ -58,7 +64,6 @@ export async function POST(req: NextRequest) {
       'TRANSCRIPTION_FAILED',
       500,
       'Transcription failed',
-      error instanceof Error ? error.message : 'Unknown error',
     );
   }
 }

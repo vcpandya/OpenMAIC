@@ -73,11 +73,17 @@ export async function generateSceneOutlinesFromRequirements(
     }
   }
 
-  // Build user profile string for prompt injection
-  const userProfileText =
-    requirements.userNickname || requirements.userBio
-      ? `## Student Profile\n\nStudent: ${requirements.userNickname || 'Unknown'}${requirements.userBio ? ` — ${requirements.userBio}` : ''}\n\nConsider this student's background when designing the course. Adapt difficulty, examples, and teaching approach accordingly.\n\n---`
-      : '';
+  // Build user profile string for prompt injection (sanitized to prevent prompt override)
+  const sanitize = (v: string, max = 200) =>
+    v.slice(0, max).replace(/[`#]/g, '').replace(/\n{2,}/g, '\n').trim();
+  const profileParts: string[] = [];
+  if (requirements.userNickname) profileParts.push(`Student: ${sanitize(requirements.userNickname, 50)}`);
+  if (requirements.userBio) profileParts.push(`About: ${sanitize(requirements.userBio)}`);
+  if (requirements.userBackground) profileParts.push(`Background: ${sanitize(requirements.userBackground, 300)}`);
+  if (requirements.userCareerAspiration) profileParts.push(`Career Goal: ${sanitize(requirements.userCareerAspiration, 300)}`);
+  const userProfileText = profileParts.length > 0
+    ? `## Student Profile\n\n${profileParts.join('\n')}\n\nPersonalization guidelines:\n- Use examples relevant to the student's industry, role, and career goals\n- If background mentions a location/region, use local companies, events, case studies, and tools as examples\n- Link concepts to practical career applications\n- For activities/projects/simulations, design scenarios aligned with their professional context\n- Adapt terminology to their domain (e.g., use marketing terms for marketers, code examples for developers)\n\n---`
+    : '';
 
   // Build media generation policy based on enabled flags
   const imageEnabled = options?.imageGenerationEnabled ?? false;
@@ -111,6 +117,7 @@ export async function generateSceneOutlinesFromRequirements(
       options?.researchContext || (requirements.language === 'zh-CN' ? '无' : 'None'),
     // Server-side generation populates this via options; client-side populates via formatTeacherPersonaForPrompt
     teacherContext: options?.teacherContext || '',
+    explanationDepth: requirements.explanationDepth || 'standard',
   });
 
   if (!prompts) {
@@ -142,6 +149,7 @@ export async function generateSceneOutlinesFromRequirements(
       id: outline.id || nanoid(),
       order: index + 1,
       language: requirements.language,
+      explanationDepth: requirements.explanationDepth || 'standard',
     }));
 
     // Replace sequential gen_img_N/gen_vid_N with globally unique IDs

@@ -27,12 +27,11 @@ export async function POST(request: NextRequest) {
     const persisted = await persistClassroom({ id, stage: { ...stage, id }, scenes }, baseUrl);
 
     return apiSuccess({ id: persisted.id, url: persisted.url }, 201);
-  } catch (error) {
+  } catch (_error) {
     return apiError(
       API_ERROR_CODES.INTERNAL_ERROR,
       500,
-      'Failed to store classroom',
-      error instanceof Error ? error.message : String(error),
+      'Classroom operation failed',
     );
   }
 }
@@ -59,12 +58,11 @@ export async function GET(request: NextRequest) {
     }
 
     return apiSuccess({ classroom });
-  } catch (error) {
+  } catch (_error) {
     return apiError(
       API_ERROR_CODES.INTERNAL_ERROR,
       500,
-      'Failed to retrieve classroom',
-      error instanceof Error ? error.message : String(error),
+      'Classroom operation failed',
     );
   }
 }

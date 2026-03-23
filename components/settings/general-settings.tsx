@@ -13,11 +13,12 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
-import { Loader2, Trash2, AlertTriangle } from 'lucide-react';
+import { Loader2, Trash2, AlertTriangle, Check } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { clearDatabase } from '@/lib/utils/database';
 import { toast } from 'sonner';
 import { createLogger } from '@/lib/logger';
+import { useSettingsStore } from '@/lib/store/settings';
 
 const log = createLogger('GeneralSettings');
 
@@ -61,8 +62,85 @@ export function GeneralSettings() {
       ? t('settings.clearCacheConfirmItems').split('、')
       : t('settings.clearCacheConfirmItems').split(', ');
 
+  const accentColor = useSettingsStore((s) => s.accentColor);
+  const setAccentColor = useSettingsStore((s) => s.setAccentColor);
+  const uiFont = useSettingsStore((s) => s.uiFont);
+  const setUiFont = useSettingsStore((s) => s.setUiFont);
+
+  const accentOptions = [
+    { id: 'purple', color: '#722ed1', label: 'Purple' },
+    { id: 'blue', color: '#2563eb', label: 'Blue' },
+    { id: 'indigo', color: '#4f46e5', label: 'Indigo' },
+    { id: 'rose', color: '#e11d48', label: 'Rose' },
+    { id: 'emerald', color: '#059669', label: 'Emerald' },
+    { id: 'amber', color: '#d97706', label: 'Amber' },
+    { id: 'teal', color: '#0d9488', label: 'Teal' },
+    { id: 'slate', color: '#475569', label: 'Slate' },
+  ];
+
+  const fontOptions = [
+    { id: 'default', label: 'Inter (Default)', sample: 'font-sans' },
+    { id: 'system', label: 'System UI', sample: 'font-[system-ui]' },
+    { id: 'mono', label: 'Monospace', sample: 'font-mono' },
+    { id: 'serif', label: 'Serif', sample: 'font-serif' },
+  ];
+
   return (
     <div className="flex flex-col gap-8">
+      {/* Appearance — Accent Color */}
+      <div className="space-y-4">
+        <div>
+          <Label className="text-sm font-medium">{t('settings.theme')}</Label>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {t('settings.themeDesc')}
+          </p>
+        </div>
+
+        {/* Accent Color */}
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Accent Color</Label>
+          <div className="flex flex-wrap gap-2">
+            {accentOptions.map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setAccentColor(opt.id)}
+                className="relative w-8 h-8 rounded-full border-2 transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95"
+                style={{
+                  backgroundColor: opt.color,
+                  borderColor: accentColor === opt.id ? opt.color : 'transparent',
+                  boxShadow: accentColor === opt.id ? `0 0 0 2px var(--background), 0 0 0 4px ${opt.color}` : 'none',
+                }}
+                title={opt.label}
+              >
+                {accentColor === opt.id && (
+                  <Check className="w-4 h-4 text-white absolute inset-0 m-auto" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* UI Font */}
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Interface Font</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {fontOptions.map((opt) => (
+              <button
+                key={opt.id}
+                onClick={() => setUiFont(opt.id)}
+                className={`px-3 py-2 rounded-lg border text-sm text-left transition-all cursor-pointer ${opt.sample} ${
+                  uiFont === opt.id
+                    ? 'border-primary bg-primary/5 text-primary font-medium'
+                    : 'border-border hover:border-primary/30 text-foreground'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Danger Zone - Clear Cache */}
       <div className="relative rounded-xl border border-destructive/30 bg-destructive/[0.03] dark:bg-destructive/[0.06] overflow-hidden">
         {/* Subtle diagonal stripe pattern for danger emphasis */}

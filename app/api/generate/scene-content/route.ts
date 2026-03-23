@@ -162,6 +162,6 @@ export async function POST(req: NextRequest) {
     return apiSuccess({ content, effectiveOutline });
   } catch (error) {
     log.error('Scene content generation error:', error);
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
+    return apiError('INTERNAL_ERROR', 500, 'Scene content generation failed');
   }
 }

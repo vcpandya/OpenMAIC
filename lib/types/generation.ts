@@ -62,12 +62,17 @@ export interface UploadedDocument {
  * Simplified user requirements for course generation
  * All details (topic, duration, style, etc.) should be included in the requirement text
  */
+export type ExplanationDepth = 'eli5' | 'standard' | 'pro';
+
 export interface UserRequirements {
   requirement: string; // Single free-form text for all user input
   language: 'zh-CN' | 'en-US'; // Course language - critical for generation
   userNickname?: string; // Student nickname for personalization
   userBio?: string; // Student background for personalization
+  userBackground?: string; // Professional/educational background
+  userCareerAspiration?: string; // Career goal for content customization
   webSearch?: boolean; // Enable web search for richer context
+  explanationDepth?: ExplanationDepth; // Content complexity: eli5, standard, pro
 }
 
 /**
@@ -101,6 +106,7 @@ export interface SceneOutline {
   estimatedDuration?: number; // seconds
   order: number;
   language?: 'zh-CN' | 'en-US'; // Generation language (inherited from requirements)
+  explanationDepth?: ExplanationDepth; // Content depth (inherited from requirements)
   // Suggested image IDs (from PDF-extracted images)
   suggestedImageIds?: string[]; // e.g., ["img_1", "img_3"]
   // AI-generated media requests (when PDF images are insufficient)

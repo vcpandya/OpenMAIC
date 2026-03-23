@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         : {}),
       ...(rawBody.enableTTS != null ? { enableTTS: rawBody.enableTTS } : {}),
       ...(rawBody.agentMode ? { agentMode: rawBody.agentMode } : {}),
+      ...(rawBody.explanationDepth ? { explanationDepth: rawBody.explanationDepth } : {}),
     };
     const { requirement } = body;
 
@@ -49,12 +50,11 @@ export async function POST(req: NextRequest) {
       },
       202,
     );
-  } catch (error) {
+  } catch (_error) {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      'Failed to create classroom generation job',
-      error instanceof Error ? error.message : 'Unknown error',
+      'Failed to start classroom generation',
     );
   }
 }

@@ -31,11 +31,17 @@ const COLOR_PALETTE = [
   '#a855f7',
 ];
 
+interface ClassProfileInput {
+  name: string;
+  personality?: string;
+}
+
 interface RequestBody {
   stageInfo: { name: string; description?: string };
   sceneOutlines?: { title: string; description?: string }[];
   language: string;
   availableAvatars: string[];
+  classProfiles?: ClassProfileInput[];
 }
 
 function stripCodeFences(text: string): string {
@@ -50,7 +56,7 @@ function stripCodeFences(text: string): string {
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json()) as RequestBody;
-    const { stageInfo, sceneOutlines, language, availableAvatars } = body;
+    const { stageInfo, sceneOutlines, language, availableAvatars, classProfiles } = body;
 
     // ── Validate required fields ──
     if (!stageInfo?.name) {
@@ -79,11 +85,26 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = `You are an expert instructional designer. Generate agent profiles for a multi-agent classroom simulation. Decide the appropriate number of agents (typically 3-5) based on the course content and complexity. Return ONLY valid JSON, no markdown or explanation.`;
 
+    // Sanitize class profiles: limit count, field lengths, strip prompt-breaking chars
+    const safeProfiles = (classProfiles ?? [])
+      .slice(0, 50)
+      .map(p => ({
+        name: String(p.name ?? '').slice(0, 50).replace(/[\n\r`#]/g, '').trim(),
+        personality: p.personality
+          ? String(p.personality).slice(0, 200).replace(/[\n\r`#]/g, '').trim()
+          : undefined,
+      }))
+      .filter(p => p.name.length > 0);
+
+    const classProfileSection = safeProfiles.length > 0
+      ? `\nThe following students are enrolled in this class. Generate agents based on these profiles instead of creating random personas:\n${safeProfiles.map(p => `- ${p.name}: ${p.personality || 'standard student'}`).join('\n')}\n`
+      : '';
+
     const userPrompt = `Generate agent profiles for the following course:
 
 Course name: ${stageInfo.name}
 ${stageInfo.description ? `Course description: ${stageInfo.description}` : ''}
-${sceneSummary ? `\nScene outlines:\n${sceneSummary}\n` : ''}
+${sceneSummary ? `\nScene outlines:\n${sceneSummary}\n` : ''}${classProfileSection}
 Requirements:
 - Decide the appropriate number of agents based on the course content (typically 3-5)
 - Exactly 1 agent must have role "teacher", the rest can be "assistant" or "student"
@@ -177,6 +198,6 @@ Return a JSON object with this exact structure:
     return apiSuccess({ agents });
   } catch (error) {
     log.error('Agent profiles generation error:', error);
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
+    return apiError('INTERNAL_ERROR', 500, 'Agent profile generation failed');
   }
 }

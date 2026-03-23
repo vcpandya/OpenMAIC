@@ -73,6 +73,8 @@ export const stageZhCN = {
     resumeDiscussion: '继续阅读',
     autoPlay: '自动播放',
     autoPlayOff: '关闭自动播放',
+    animationsOn: '开启入场动画',
+    animationsOff: '关闭入场动画',
     speed: '倍速',
   },
   pbl: {
@@ -221,6 +223,8 @@ export const stageEnUS = {
     resumeDiscussion: 'Resume',
     autoPlay: 'Auto-play',
     autoPlayOff: 'Stop auto-play',
+    animationsOn: 'Enable entrance animations',
+    animationsOff: 'Disable entrance animations',
     speed: 'Speed',
   },
   pbl: {

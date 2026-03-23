@@ -25,9 +25,13 @@ export function UserProfileCard() {
   const avatar = useUserProfileStore((s) => s.avatar);
   const nickname = useUserProfileStore((s) => s.nickname);
   const bio = useUserProfileStore((s) => s.bio);
+  const background = useUserProfileStore((s) => s.background);
+  const careerAspiration = useUserProfileStore((s) => s.careerAspiration);
   const setAvatar = useUserProfileStore((s) => s.setAvatar);
   const setNickname = useUserProfileStore((s) => s.setNickname);
   const setBio = useUserProfileStore((s) => s.setBio);
+  const setBackground = useUserProfileStore((s) => s.setBackground);
+  const setCareerAspiration = useUserProfileStore((s) => s.setCareerAspiration);
 
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
@@ -225,6 +229,26 @@ export function UserProfileCard() {
         rows={3}
         className="mt-3 resize-none bg-background/50 min-h-[80px]"
       />
+
+      {/* Background & Career fields */}
+      <div className="mt-3 space-y-2">
+        <Textarea
+          value={background}
+          onChange={(e) => setBackground(e.target.value)}
+          placeholder={t('profile.backgroundPlaceholder')}
+          maxLength={300}
+          rows={2}
+          className="resize-none bg-background/50 min-h-[56px] text-xs"
+        />
+        <Textarea
+          value={careerAspiration}
+          onChange={(e) => setCareerAspiration(e.target.value)}
+          placeholder={t('profile.careerPlaceholder')}
+          maxLength={300}
+          rows={2}
+          className="resize-none bg-background/50 min-h-[56px] text-xs"
+        />
+      </div>
     </Card>
   );
 }

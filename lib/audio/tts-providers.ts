@@ -345,7 +345,7 @@ async function generateElevenLabsTTS(
     {
       method: 'POST',
       headers: {
-        'xi-api-key': config.apiKey!,
+        'xi-api-key': config.apiKey || '',
         'Content-Type': 'application/json; charset=utf-8',
       },
       body: JSON.stringify({

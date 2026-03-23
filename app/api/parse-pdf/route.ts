@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const effectiveProviderId = providerId || ('unpdf' as PDFProviderId);
 
     const clientBaseUrl = baseUrl || undefined;
-    if (clientBaseUrl && process.env.NODE_ENV === 'production') {
+    if (clientBaseUrl) {
       const ssrfError = validateUrlForSSRF(clientBaseUrl);
       if (ssrfError) {
         return apiError('INVALID_URL', 403, ssrfError);
@@ -50,6 +50,12 @@ export async function POST(req: NextRequest) {
         ? clientBaseUrl
         : resolvePDFBaseUrl(effectiveProviderId, baseUrl || undefined),
     };
+
+    // Reject oversized files before reading into memory
+    const MAX_PDF_SIZE = 50 * 1024 * 1024; // 50MB
+    if (pdfFile.size > MAX_PDF_SIZE) {
+      return apiError('INVALID_REQUEST', 413, 'PDF file exceeds maximum size of 50MB');
+    }
 
     // Convert PDF to buffer
     const arrayBuffer = await pdfFile.arrayBuffer();
@@ -72,6 +78,6 @@ export async function POST(req: NextRequest) {
     return apiSuccess({ data: resultWithMetadata });
   } catch (error) {
     log.error('Error parsing PDF:', error);
-    return apiError('PARSE_FAILED', 500, error instanceof Error ? error.message : 'Unknown error');
+    return apiError('PARSE_FAILED', 500, 'PDF parsing failed');
   }
 }

@@ -70,7 +70,8 @@ export function SpotlightOverlay() {
   }, [measure, elements]);
 
   const active = !!spotlightElementId && !!spotlightOptions && !!rect;
-  const dimness = spotlightOptions?.dimness ?? 0.7;
+  // Subtle dimming — just enough to de-emphasize without obscuring context
+  const dimness = spotlightOptions?.dimness ?? 0.15;
 
   return (
     <div
@@ -84,6 +85,7 @@ export function SpotlightOverlay() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
             className="absolute inset-0"
           >
             <svg
@@ -95,43 +97,46 @@ export function SpotlightOverlay() {
             >
               <defs>
                 <mask id={`mask-${spotlightElementId}`}>
-                  {/* White background = show mask layer (dimmed) */}
+                  {/* White = show dimmed layer, black = cutout (highlighted area) */}
                   <rect x="0" y="0" width="100" height="100" fill="white" />
-                  {/* Black rectangle = hide mask layer (highlighted area / cutout) */}
                   <motion.rect
                     fill="black"
                     initial={{
-                      x: rect.x - 8,
-                      y: rect.y - 8,
-                      width: rect.w + 16,
-                      height: rect.h + 16,
-                      rx: 4,
+                      x: rect.x - 6,
+                      y: rect.y - 6,
+                      width: rect.w + 12,
+                      height: rect.h + 12,
+                      rx: 3,
                     }}
                     animate={{
-                      x: rect.x - 0.4,
-                      y: rect.y - 0.6,
-                      width: rect.w + 0.8,
-                      height: rect.h + 1.2,
-                      rx: 1,
+                      x: rect.x - 1.5,
+                      y: rect.y - 1.5,
+                      width: rect.w + 3,
+                      height: rect.h + 3,
+                      rx: 1.2,
                     }}
                     transition={{
-                      duration: 0.6,
+                      duration: 0.5,
                       ease: [0.16, 1, 0.3, 1],
                     }}
                   />
                 </mask>
+
+                {/* Soft glow filter for the accent border */}
+                <filter id={`glow-${spotlightElementId}`} x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" />
+                </filter>
               </defs>
 
-              {/* Dimmed Background */}
+              {/* Very subtle background dim — guides attention without obscuring */}
               <rect
                 width="100"
                 height="100"
                 fill={`rgba(0,0,0,${dimness})`}
                 mask={`url(#mask-${spotlightElementId})`}
-                className="backdrop-blur-[1.5px]"
               />
 
-              {/* THE ONE BORDER - white border */}
+              {/* Outer glow halo — soft indigo, blurred */}
               <motion.rect
                 initial={{
                   x: rect.x - 4,
@@ -139,22 +144,51 @@ export function SpotlightOverlay() {
                   width: rect.w + 8,
                   height: rect.h + 8,
                   opacity: 0,
-                  rx: 2,
+                  rx: 2.5,
                 }}
                 animate={{
-                  x: rect.x - 0.4,
-                  y: rect.y - 0.6,
-                  width: rect.w + 0.8,
-                  height: rect.h + 1.2,
+                  x: rect.x - 1.5,
+                  y: rect.y - 1.5,
+                  width: rect.w + 3,
+                  height: rect.h + 3,
                   opacity: 1,
-                  rx: 1,
+                  rx: 1.2,
                 }}
                 fill="none"
-                stroke="rgba(255,255,255,0.7)"
-                strokeWidth="1.2"
+                stroke="rgba(99,102,241,0.25)"
+                strokeWidth="5"
+                filter={`url(#glow-${spotlightElementId})`}
                 style={{ vectorEffect: 'non-scaling-stroke' } as React.CSSProperties}
                 transition={{
                   duration: 0.5,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+              />
+
+              {/* Crisp accent border — soft indigo */}
+              <motion.rect
+                initial={{
+                  x: rect.x - 4,
+                  y: rect.y - 4,
+                  width: rect.w + 8,
+                  height: rect.h + 8,
+                  opacity: 0,
+                  rx: 2.5,
+                }}
+                animate={{
+                  x: rect.x - 1.5,
+                  y: rect.y - 1.5,
+                  width: rect.w + 3,
+                  height: rect.h + 3,
+                  opacity: 1,
+                  rx: 1.2,
+                }}
+                fill="none"
+                stroke="rgba(99,102,241,0.45)"
+                strokeWidth="1.8"
+                style={{ vectorEffect: 'non-scaling-stroke' } as React.CSSProperties}
+                transition={{
+                  duration: 0.45,
                   delay: 0.05,
                   ease: [0.16, 1, 0.3, 1],
                 }}

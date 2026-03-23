@@ -28,7 +28,7 @@ export async function GET() {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      error instanceof Error ? error.message : 'Unknown error',
+      'Failed to load provider configuration',
     );
   }
 }

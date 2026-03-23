@@ -109,6 +109,9 @@ export const useMediaGenerationStore = create<MediaGenerationState>()((set, get)
     set((s) => {
       const task = s.tasks[elementId];
       if (!task) return s;
+      // Revoke previous object URLs to prevent memory leak on regeneration
+      if (task.objectUrl) URL.revokeObjectURL(task.objectUrl);
+      if (task.poster) URL.revokeObjectURL(task.poster);
       return {
         tasks: {
           ...s.tasks,

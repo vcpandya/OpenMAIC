@@ -51,6 +51,11 @@ export async function POST(req: NextRequest) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: messages');
     }
 
+    const MAX_MESSAGES = 200;
+    if (body.messages.length > MAX_MESSAGES) {
+      return apiError('INVALID_REQUEST', 400, `Too many messages (max ${MAX_MESSAGES})`);
+    }
+
     if (!body.storeState) {
       return apiError('MISSING_REQUIRED_FIELD', 400, 'Missing required field: storeState');
     }
@@ -175,7 +180,7 @@ export async function POST(req: NextRequest) {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      error instanceof Error ? error.message : 'Failed to process request',
+      'Failed to process chat request',
     );
   }
 }

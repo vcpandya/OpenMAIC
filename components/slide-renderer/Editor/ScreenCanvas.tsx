@@ -6,6 +6,7 @@ import { SpotlightOverlay } from './SpotlightOverlay';
 import { LaserOverlay } from './LaserOverlay';
 import { useSlideBackgroundStyle } from '@/lib/hooks/use-slide-background-style';
 import { useCanvasStore } from '@/lib/store';
+import { useSettingsStore } from '@/lib/store/settings';
 import { useSceneSelector } from '@/lib/contexts/scene-context';
 import { findElementGeometry } from '@/lib/utils/geometry';
 import type { SlideContent } from '@/lib/types/stage';
@@ -13,7 +14,7 @@ import type { PPTElement, SlideBackground } from '@/lib/types/slides';
 import type { PercentageGeometry } from '@/lib/types/action';
 import { useViewportSize } from './Canvas/hooks/useViewportSize';
 import { useRef, useMemo } from 'react';
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 
 export function ScreenCanvas() {
   const canvasScale = useCanvasStore.use.canvasScale();
@@ -30,6 +31,10 @@ export function ScreenCanvas() {
     (content) => content.canvas.background,
   );
   const { backgroundStyle } = useSlideBackgroundStyle(background);
+
+  // Get entrance animation state
+  const revealedElementIds = useCanvasStore.use.revealedElementIds();
+  const slideAnimationsEnabled = useSettingsStore((s) => s.slideAnimationsEnabled);
 
   // Get visual effect state
   const laserElementId = useCanvasStore.use.laserElementId();
@@ -90,9 +95,22 @@ export function ScreenCanvas() {
             transform: `scale(${canvasScale})`,
           }}
         >
-          {elements.map((element, index) => (
-            <ScreenElement key={element.id} elementInfo={element} elementIndex={index + 1} />
-          ))}
+          <AnimatePresence>
+            {elements.map((element, index) => {
+              const isRevealed = !slideAnimationsEnabled || revealedElementIds.includes(element.id);
+              if (slideAnimationsEnabled && !isRevealed) return null;
+              return (
+                <motion.div
+                  key={element.id}
+                  initial={slideAnimationsEnabled ? { opacity: 0, y: 12 } : false}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <ScreenElement elementInfo={element} elementIndex={index + 1} />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
 
           {/* Highlight overlay - stacked above elements */}
           <HighlightOverlay />

@@ -519,6 +519,15 @@ When splitting a derivation across multiple LaTeX elements (one per line), simpl
 
 ---
 
+## Explanation Depth: {{explanationDepth}}
+
+Adjust content based on depth:
+- **eli5**: Max 15 words per bullet, simple language, more visual aids, everyday analogies
+- **standard**: Up to 20 words per bullet, standard vocabulary, balanced examples
+- **pro**: Up to 30+ words per bullet, technical terms acceptable, denser layouts, cite specific methods/frameworks
+
+---
+
 ## Design Rules
 
 ### Rule 1: Text Width Calculation

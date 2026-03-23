@@ -37,12 +37,11 @@ export async function GET(req: NextRequest, context: { params: Promise<{ jobId: 
       error: job.error,
       done: job.status === 'succeeded' || job.status === 'failed',
     });
-  } catch (error) {
+  } catch (_error) {
     return apiError(
       'INTERNAL_ERROR',
       500,
-      'Failed to retrieve classroom generation job',
-      error instanceof Error ? error.message : String(error),
+      'Failed to retrieve job status',
     );
   }
 }

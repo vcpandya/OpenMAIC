@@ -51,10 +51,11 @@ export async function POST(request: NextRequest) {
         'Content-Type': contentType,
         'Content-Length': String(blob.size),
         'Cache-Control': 'private, max-age=3600',
+        'X-Content-Type-Options': 'nosniff',
       },
     });
   } catch (error) {
     log.error('Proxy media error:', error);
-    return apiError('INTERNAL_ERROR', 500, error instanceof Error ? error.message : String(error));
+    return apiError('INTERNAL_ERROR', 500, 'Failed to proxy media');
   }
 }

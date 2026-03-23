@@ -14,6 +14,8 @@ import {
   Repeat,
   BookOpen,
   Loader2,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { CanvasToolbar } from '@/components/canvas/canvas-toolbar';
@@ -77,6 +79,8 @@ interface RoundtableProps {
   readonly onPrevSlide?: () => void;
   readonly onNextSlide?: () => void;
   readonly onWhiteboardClose?: () => void;
+  readonly discussionExpanded?: boolean;
+  readonly onToggleExpanded?: () => void;
 }
 
 const DEFAULT_TEACHER_AVATAR = '/avatars/teacher.png';
@@ -137,6 +141,8 @@ export function Roundtable({
   onPrevSlide,
   onNextSlide,
   onWhiteboardClose,
+  discussionExpanded = false,
+  onToggleExpanded,
 }: RoundtableProps) {
   const { t } = useI18n();
   const ttsMuted = useSettingsStore((s) => s.ttsMuted);
@@ -149,6 +155,8 @@ export function Roundtable({
   const setAutoPlayLecture = useSettingsStore((s) => s.setAutoPlayLecture);
   const playbackSpeed = useSettingsStore((s) => s.playbackSpeed);
   const setPlaybackSpeed = useSettingsStore((s) => s.setPlaybackSpeed);
+  const slideAnimationsEnabled = useSettingsStore((s) => s.slideAnimationsEnabled);
+  const setSlideAnimationsEnabled = useSettingsStore((s) => s.setSlideAnimationsEnabled);
   const [isInputOpen, setIsInputOpen] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -428,10 +436,14 @@ export function Roundtable({
   }, [playbackSpeed, setPlaybackSpeed]);
 
   return (
-    <div className="h-[192px] w-full flex flex-col relative z-10 border-t border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md">
+    <div
+      className="w-full flex flex-col relative z-10 border-t border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md transition-all duration-500 ease-out"
+      style={{ height: discussionExpanded ? 'min(50vh, 400px)' : '192px' }}
+    >
       {/* ── Toolbar strip — merged from CanvasArea ── */}
+      <div className="shrink-0 h-8 flex items-center border-b border-gray-100/40 dark:border-gray-700/30">
       <CanvasToolbar
-        className="shrink-0 h-8 px-3 border-b border-gray-100/40 dark:border-gray-700/30"
+        className="flex-1 h-8 px-3"
         currentSceneIndex={currentSceneIndex}
         scenesCount={scenesCount}
         engineState={
@@ -462,12 +474,22 @@ export function Roundtable({
         onToggleAutoPlay={() => setAutoPlayLecture(!autoPlayLecture)}
         playbackSpeed={playbackSpeed}
         onCycleSpeed={handleCycleSpeed}
+        slideAnimationsEnabled={slideAnimationsEnabled}
+        onToggleSlideAnimations={() => setSlideAnimationsEnabled(!slideAnimationsEnabled)}
       />
+      <button
+        onClick={() => onToggleExpanded?.()}
+        className="shrink-0 w-6 h-6 mr-1 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+        title={discussionExpanded ? 'Collapse' : 'Expand'}
+      >
+        {discussionExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+      </button>
+      </div>
 
       {/* ── Interaction area — three-column layout ── */}
       <div className="flex-1 flex items-stretch min-h-0">
         {/* Left: Teacher identity */}
-        <div className="w-[90px] shrink-0 flex flex-col border-r border-gray-100/50 dark:border-gray-700/50 bg-white/40 dark:bg-gray-900/40 overflow-visible relative">
+        <div className="w-[60px] md:w-[90px] shrink-0 flex flex-col border-r border-gray-100/50 dark:border-gray-700/50 bg-white/40 dark:bg-gray-900/40 overflow-visible relative">
           {/* Decorative Element (Top) */}
           <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-purple-50/50 dark:from-purple-900/10 to-transparent pointer-events-none" />
           <div className="absolute top-3 inset-x-0 flex flex-col items-center justify-center gap-1 opacity-10 pointer-events-none">
@@ -645,7 +667,7 @@ export function Roundtable({
                   onClick={(e) => e.stopPropagation()}
                   className="absolute inset-x-6 bottom-4 z-20 flex items-center justify-end"
                 >
-                  <div className="relative w-fit max-w-[85%] sm:max-w-[65%] min-w-[200px] sm:min-w-[300px] bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-2 pr-2 rounded-2xl rounded-br-none shadow-2xl border border-purple-200 dark:border-purple-700 flex items-end gap-2 ring-1 ring-purple-100/50 dark:ring-purple-800/50">
+                  <div className="relative w-fit max-w-[90%] sm:max-w-[65%] min-w-[120px] sm:min-w-[300px] bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-2 pr-2 rounded-2xl rounded-br-none shadow-2xl border border-purple-200 dark:border-purple-700 flex items-end gap-2 ring-1 ring-purple-100/50 dark:ring-purple-800/50">
                     <div className="pl-4 flex-1 py-1 min-w-0">
                       <textarea
                         value={inputValue}
@@ -918,7 +940,7 @@ export function Roundtable({
                       ease: 'easeInOut',
                     }}
                     className={cn(
-                      'text-[10px] font-medium tracking-wider',
+                      'text-[11px] md:text-[10px] font-medium tracking-wider',
                       asrEnabled
                         ? 'text-amber-600/70 dark:text-amber-400/60'
                         : 'text-purple-600/70 dark:text-purple-400/60',
@@ -974,7 +996,7 @@ export function Roundtable({
                         onPlayPause?.();
                       }}
                       className={cn(
-                        'relative px-4 pt-2 pb-3 rounded-2xl text-[15px] leading-relaxed transition-all border max-w-[65%] min-w-[200px] group/bubble flex flex-col max-h-[110px]',
+                        'relative px-4 pt-2 pb-3 rounded-2xl text-[15px] leading-relaxed transition-all border max-w-[90%] md:max-w-[65%] min-w-[120px] md:min-w-[200px] group/bubble flex flex-col max-h-[110px]',
                         bubbleRole === 'teacher' ? 'pl-4 pr-10' : 'pl-4 pr-10',
                         bubbleRole === 'user'
                           ? 'bg-purple-600/95 dark:bg-purple-500/95 backdrop-blur-sm border-purple-400/40 dark:border-purple-300/40 text-white rounded-br-sm shadow-md shadow-purple-300/30 dark:shadow-purple-800/30'
@@ -1462,7 +1484,7 @@ export function Roundtable({
                     initial={{ opacity: 0, y: 4, scale: 0.9 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 4, scale: 0.9 }}
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 bg-amber-500 text-white text-[9px] font-bold rounded-full shadow-sm z-30"
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap px-2 py-0.5 bg-amber-500 text-white text-[11px] md:text-[9px] font-bold rounded-full shadow-sm z-30"
                   >
                     {t('roundtable.yourTurn')}
                   </motion.div>

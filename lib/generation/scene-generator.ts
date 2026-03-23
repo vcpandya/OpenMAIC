@@ -155,6 +155,7 @@ export async function generateSceneContent(
   visionEnabled?: boolean,
   generatedMediaMapping?: ImageMapping,
   agents?: AgentInfo[],
+  userProfile?: string,
 ): Promise<
   | GeneratedSlideContent
   | GeneratedQuizContent
@@ -176,6 +177,7 @@ export async function generateSceneContent(
       visionEnabled,
       generatedMediaMapping,
       agents,
+      userProfile,
     );
   }
 
@@ -189,13 +191,14 @@ export async function generateSceneContent(
         visionEnabled,
         generatedMediaMapping,
         agents,
+        userProfile,
       );
     case 'quiz':
-      return generateQuizContent(outline, aiCall);
+      return generateQuizContent(outline, aiCall, userProfile);
     case 'interactive':
-      return generateInteractiveContent(outline, aiCall, outline.language);
+      return generateInteractiveContent(outline, aiCall, outline.language, userProfile);
     case 'pbl':
-      return generatePBLSceneContent(outline, languageModel);
+      return generatePBLSceneContent(outline, languageModel, userProfile);
     default:
       return null;
   }
@@ -466,6 +469,7 @@ async function generateSlideContent(
   visionEnabled?: boolean,
   generatedMediaMapping?: ImageMapping,
   agents?: AgentInfo[],
+  userProfile?: string,
 ): Promise<GeneratedSlideContent | null> {
   const lang = outline.language || 'zh-CN';
 
@@ -544,6 +548,8 @@ async function generateSlideContent(
     canvas_width: canvasWidth,
     canvas_height: canvasHeight,
     teacherContext,
+    explanationDepth: outline.explanationDepth || 'standard',
+    userProfile: userProfile || '',
   });
 
   if (!prompts) {
@@ -632,6 +638,7 @@ async function generateSlideContent(
 async function generateQuizContent(
   outline: SceneOutline,
   aiCall: AICallFn,
+  userProfile?: string,
 ): Promise<GeneratedQuizContent | null> {
   const quizConfig = outline.quizConfig || {
     questionCount: 3,
@@ -646,6 +653,8 @@ async function generateQuizContent(
     questionCount: quizConfig.questionCount,
     difficulty: quizConfig.difficulty,
     questionTypes: quizConfig.questionTypes.join(', '),
+    explanationDepth: outline.explanationDepth || 'standard',
+    userProfile: userProfile || '',
   });
 
   if (!prompts) {
@@ -736,6 +745,7 @@ async function generateInteractiveContent(
   outline: SceneOutline,
   aiCall: AICallFn,
   language: 'zh-CN' | 'en-US' = 'zh-CN',
+  userProfile?: string,
 ): Promise<GeneratedInteractiveContent | null> {
   const config = outline.interactiveConfig!;
 
@@ -748,6 +758,8 @@ async function generateInteractiveContent(
       conceptOverview: config.conceptOverview,
       keyPoints: (outline.keyPoints || []).map((p, i) => `${i + 1}. ${p}`).join('\n'),
       designIdea: config.designIdea,
+      explanationDepth: outline.explanationDepth || 'standard',
+      userProfile: userProfile || '',
     });
 
     if (modelPrompts) {
@@ -793,6 +805,8 @@ async function generateInteractiveContent(
     scientificConstraints,
     designIdea: config.designIdea,
     language,
+    explanationDepth: outline.explanationDepth || 'standard',
+    userProfile: userProfile || '',
   });
 
   if (!htmlPrompts) {
@@ -826,6 +840,7 @@ async function generateInteractiveContent(
 async function generatePBLSceneContent(
   outline: SceneOutline,
   languageModel?: LanguageModel,
+  _userProfile?: string,
 ): Promise<GeneratedPBLContent | null> {
   if (!languageModel) {
     log.error('LanguageModel required for PBL generation');
@@ -931,6 +946,7 @@ export async function generateSceneActions(
       courseContext: buildCourseContext(ctx),
       agents: agentsText,
       userProfile: userProfile || '',
+      explanationDepth: outline.explanationDepth || 'standard',
     });
 
     if (!prompts) {
@@ -959,6 +975,7 @@ export async function generateSceneActions(
       questions: questionsText,
       courseContext: buildCourseContext(ctx),
       agents: agentsText,
+      explanationDepth: outline.explanationDepth || 'standard',
     });
 
     if (!prompts) {
@@ -986,6 +1003,7 @@ export async function generateSceneActions(
       designIdea: config?.designIdea || '',
       courseContext: buildCourseContext(ctx),
       agents: agentsText,
+      explanationDepth: outline.explanationDepth || 'standard',
     });
 
     if (!prompts) {
@@ -1013,6 +1031,7 @@ export async function generateSceneActions(
       projectDescription: pblConfig?.projectDescription || outline.description,
       courseContext: buildCourseContext(ctx),
       agents: agentsText,
+      explanationDepth: outline.explanationDepth || 'standard',
     });
 
     if (!prompts) {

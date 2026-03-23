@@ -138,6 +138,7 @@ export interface SettingsState {
   ttsVolume: number; // 0-1, actual volume level
   autoPlayLecture: boolean;
   playbackSpeed: PlaybackSpeed;
+  slideAnimationsEnabled: boolean; // Progressive element reveal during playback
 
   // Agent settings
   selectedAgentIds: string[];
@@ -150,6 +151,10 @@ export interface SettingsState {
   chatAreaCollapsed: boolean;
   chatAreaWidth: number;
 
+  // Appearance preferences
+  accentColor: string; // 'purple' | 'blue' | 'indigo' | 'rose' | 'emerald' | 'amber' | 'slate' | 'teal'
+  uiFont: string; // 'default' | 'system' | 'mono' | 'serif'
+
   // Actions
   setModel: (providerId: ProviderId, modelId: string) => void;
   setProviderConfig: (providerId: ProviderId, config: Partial<ProvidersConfig[ProviderId]>) => void;
@@ -159,6 +164,7 @@ export interface SettingsState {
   setTTSVolume: (volume: number) => void;
   setAutoPlayLecture: (autoPlay: boolean) => void;
   setPlaybackSpeed: (speed: PlaybackSpeed) => void;
+  setSlideAnimationsEnabled: (enabled: boolean) => void;
   setSelectedAgentIds: (ids: string[]) => void;
   setMaxTurns: (turns: string) => void;
   setAgentMode: (mode: 'preset' | 'auto') => void;
@@ -168,6 +174,10 @@ export interface SettingsState {
   setSidebarCollapsed: (collapsed: boolean) => void;
   setChatAreaCollapsed: (collapsed: boolean) => void;
   setChatAreaWidth: (width: number) => void;
+
+  // Appearance actions
+  setAccentColor: (color: string) => void;
+  setUiFont: (font: string) => void;
 
   // Audio actions
   setTTSProvider: (providerId: TTSProviderId) => void;
@@ -524,11 +534,16 @@ export const useSettingsStore = create<SettingsState>()(
         ttsVolume: 1,
         autoPlayLecture: false,
         playbackSpeed: 1,
+        slideAnimationsEnabled: true,
 
         // Layout preferences
         sidebarCollapsed: true,
         chatAreaCollapsed: true,
         chatAreaWidth: 320,
+
+        // Appearance preferences
+        accentColor: 'purple',
+        uiFont: 'default',
 
         // Audio settings (use defaults)
         ...defaultAudioConfig,
@@ -581,6 +596,8 @@ export const useSettingsStore = create<SettingsState>()(
 
         setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
 
+        setSlideAnimationsEnabled: (enabled) => set({ slideAnimationsEnabled: enabled }),
+
         setSelectedAgentIds: (ids) => set({ selectedAgentIds: ids }),
 
         setMaxTurns: (turns) => set({ maxTurns: turns }),
@@ -591,6 +608,20 @@ export const useSettingsStore = create<SettingsState>()(
         setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
         setChatAreaCollapsed: (collapsed) => set({ chatAreaCollapsed: collapsed }),
         setChatAreaWidth: (width) => set({ chatAreaWidth: width }),
+
+        // Appearance actions
+        setAccentColor: (color) => {
+          set({ accentColor: color });
+          if (typeof document !== 'undefined') {
+            document.documentElement.setAttribute('data-accent', color === 'purple' ? '' : color);
+          }
+        },
+        setUiFont: (font) => {
+          set({ uiFont: font });
+          if (typeof document !== 'undefined') {
+            document.documentElement.setAttribute('data-ui-font', font === 'default' ? '' : font);
+          }
+        },
 
         // Audio actions
         setTTSProvider: (providerId) =>

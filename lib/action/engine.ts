@@ -11,6 +11,7 @@
 
 import type { StageStore } from '@/lib/api/stage-api';
 import { createStageAPI } from '@/lib/api/stage-api';
+import { generateId } from '@/lib/api/stage-api-defaults';
 import { useCanvasStore } from '@/lib/store/canvas';
 import { useWhiteboardHistoryStore } from '@/lib/store/whiteboard-history';
 import { useMediaGenerationStore, isMediaPlaceholder } from '@/lib/store/media-generation';
@@ -29,6 +30,7 @@ import type {
   WbDrawTableAction,
   WbDeleteAction,
   WbDrawLineAction,
+  RevealElementAction,
 } from '@/lib/types/action';
 import katex from 'katex';
 import { createLogger } from '@/lib/logger';
@@ -93,6 +95,9 @@ export class ActionEngine {
       case 'laser':
         this.executeLaser(action);
         return;
+      case 'reveal_element':
+        this.executeRevealElement(action);
+        return;
       // Synchronous — Video
       case 'play_video':
         return this.executePlayVideo(action as PlayVideoAction);
@@ -149,8 +154,13 @@ export class ActionEngine {
   // ==================== Fire-and-forget ====================
 
   private executeSpotlight(action: SpotlightAction): void {
-    useCanvasStore.getState().setSpotlight(action.elementId, {
-      dimness: action.dimOpacity ?? 0.5,
+    const store = useCanvasStore.getState();
+    // Auto-reveal the element if entrance animations are active
+    if (store.slideAnimationsEnabled && !store.revealedElementIds.includes(action.elementId)) {
+      store.revealElement(action.elementId);
+    }
+    store.setSpotlight(action.elementId, {
+      dimness: action.dimOpacity ?? 0.15,
     });
     this.scheduleEffectClear();
   }
@@ -160,6 +170,10 @@ export class ActionEngine {
       color: action.color ?? '#ff0000',
     });
     this.scheduleEffectClear();
+  }
+
+  private executeRevealElement(action: RevealElementAction): void {
+    useCanvasStore.getState().revealElement(action.elementId);
   }
 
   // ==================== Synchronous — Speech ====================
@@ -190,18 +204,23 @@ export class ActionEngine {
       if (task && task.status !== 'done') {
         // Wait for media to be ready (or fail)
         await new Promise<void>((resolve) => {
+          let resolved = false;
+          const settle = () => {
+            if (resolved) return;
+            resolved = true;
+            unsubscribe();
+            resolve();
+          };
           const unsubscribe = useMediaGenerationStore.subscribe((state) => {
             const t = state.tasks[placeholderId];
             if (!t || t.status === 'done' || t.status === 'failed') {
-              unsubscribe();
-              resolve();
+              settle();
             }
           });
           // Check again in case it resolved between getState and subscribe
           const current = useMediaGenerationStore.getState().tasks[placeholderId];
           if (!current || current.status === 'done' || current.status === 'failed') {
-            unsubscribe();
-            resolve();
+            settle();
           }
         });
 
@@ -216,15 +235,20 @@ export class ActionEngine {
 
     // Wait until the video finishes playing
     return new Promise<void>((resolve) => {
+      let resolved = false;
+      const settle = () => {
+        if (resolved) return;
+        resolved = true;
+        unsubscribe();
+        resolve();
+      };
       const unsubscribe = useCanvasStore.subscribe((state) => {
         if (state.playingVideoElementId !== action.elementId) {
-          unsubscribe();
-          resolve();
+          settle();
         }
       });
       if (useCanvasStore.getState().playingVideoElementId !== action.elementId) {
-        unsubscribe();
-        resolve();
+        settle();
       }
     });
   }
@@ -292,7 +316,7 @@ export class ActionEngine {
 
     this.stageAPI.whiteboard.addElement(
       {
-        id: action.elementId || '',
+        id: action.elementId || generateId('wb'),
         type: 'text',
         content: htmlContent,
         left: action.x,
@@ -317,7 +341,7 @@ export class ActionEngine {
 
     this.stageAPI.whiteboard.addElement(
       {
-        id: action.elementId || '',
+        id: action.elementId || generateId('wb'),
         type: 'shape',
         viewBox: [1000, 1000] as [number, number],
         path: SHAPE_PATHS[action.shape] ?? SHAPE_PATHS.rectangle,
@@ -343,7 +367,7 @@ export class ActionEngine {
 
     this.stageAPI.whiteboard.addElement(
       {
-        id: action.elementId || '',
+        id: action.elementId || generateId('wb'),
         type: 'chart',
         left: action.x,
         top: action.y,
@@ -374,7 +398,7 @@ export class ActionEngine {
 
       this.stageAPI.whiteboard.addElement(
         {
-          id: action.elementId || '',
+          id: action.elementId || generateId('wb'),
           type: 'latex',
           left: action.x,
           top: action.y,
@@ -421,7 +445,7 @@ export class ActionEngine {
 
     this.stageAPI.whiteboard.addElement(
       {
-        id: action.elementId || '',
+        id: action.elementId || generateId('wb'),
         type: 'table',
         left: action.x,
         top: action.y,
@@ -467,7 +491,7 @@ export class ActionEngine {
 
     this.stageAPI.whiteboard.addElement(
       {
-        id: action.elementId || '',
+        id: action.elementId || generateId('wb'),
         type: 'line',
         left,
         top,

@@ -7,6 +7,14 @@ export type SceneType = 'slide' | 'quiz' | 'interactive' | 'pbl';
 
 export type StageMode = 'autonomous' | 'playback';
 
+export interface RecommendedTool {
+  name: string;
+  description: string;
+  url?: string;
+  category: 'open-source' | 'saas' | 'resource';
+  verified: boolean;
+}
+
 export type Whiteboard = Omit<Slide, 'theme' | 'turningMode' | 'sectionTag' | 'type'>;
 
 /**
@@ -23,6 +31,8 @@ export interface Stage {
   style?: string;
   // Whiteboard data
   whiteboard?: Whiteboard[];
+  // Curated tools section
+  recommendedTools?: RecommendedTool[];
 }
 
 /**

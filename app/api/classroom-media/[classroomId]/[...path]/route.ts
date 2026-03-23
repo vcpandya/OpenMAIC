@@ -77,6 +77,7 @@ export async function GET(
         'Content-Type': contentType,
         'Content-Length': String(stat.size),
         'Cache-Control': 'public, max-age=86400, immutable',
+        'X-Content-Type-Options': 'nosniff',
       },
     });
   } catch (error) {

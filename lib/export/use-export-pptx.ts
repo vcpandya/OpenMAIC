@@ -486,8 +486,8 @@ async function buildPptxBlob(
             const blob = await resp.blob();
             resolvedSrc = await new Promise<string>((resolve, reject) => {
               const reader = new FileReader();
-              reader.onloadend = () => resolve(reader.result as string);
-              reader.onerror = reject;
+              reader.onloadend = () => { reader.onloadend = null; reader.onerror = null; resolve(reader.result as string); };
+              reader.onerror = (e) => { reader.onloadend = null; reader.onerror = null; reject(e); };
               reader.readAsDataURL(blob);
             });
           } catch {
@@ -1020,6 +1020,15 @@ async function buildPptxBlob(
                   video.crossOrigin = 'anonymous';
                   video.muted = true;
                   video.preload = 'auto';
+
+                  const cleanup = () => {
+                    video.onloadeddata = null;
+                    video.onseeked = null;
+                    video.onerror = null;
+                    video.src = '';
+                    video.load();
+                  };
+
                   video.onloadeddata = () => {
                     video.currentTime = 0;
                   };
@@ -1031,18 +1040,21 @@ async function buildPptxBlob(
                       const ctx = canvas.getContext('2d');
                       if (ctx) {
                         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/png'));
+                        const result = canvas.toDataURL('image/png');
+                        cleanup();
+                        resolve(result);
                       } else {
+                        cleanup();
                         reject(new Error('No canvas context'));
                       }
-                      video.src = ''; // Release
                     } catch (e) {
+                      cleanup();
                       reject(e);
                     }
                   };
-                  video.onerror = () => reject(new Error('Video load failed'));
+                  video.onerror = () => { cleanup(); reject(new Error('Video load failed')); };
                   // Timeout to avoid hanging
-                  setTimeout(() => reject(new Error('Video frame capture timeout')), 10000);
+                  setTimeout(() => { cleanup(); reject(new Error('Video frame capture timeout')); }, 10000);
                   video.src = resolvedSrc;
                 });
               } catch {

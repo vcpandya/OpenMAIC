@@ -9,6 +9,8 @@
 
 {{teacherContext}}
 
+{{userProfile}}
+
 ## Available Resources
 
 - **Available Images**: {{assignedImages}}

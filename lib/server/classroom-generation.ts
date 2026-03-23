@@ -27,7 +27,7 @@ import {
   generateTTSForClassroom,
 } from '@/lib/server/classroom-media-generation';
 import type { UserRequirements } from '@/lib/types/generation';
-import type { Scene, Stage } from '@/lib/types/stage';
+import type { Scene, Stage, RecommendedTool } from '@/lib/types/stage';
 
 const log = createLogger('Classroom');
 
@@ -40,6 +40,7 @@ export interface GenerateClassroomInput {
   enableVideoGeneration?: boolean;
   enableTTS?: boolean;
   agentMode?: 'default' | 'generate';
+  explanationDepth?: 'eli5' | 'standard' | 'pro';
 }
 
 export type ClassroomGenerationStep =
@@ -106,6 +107,48 @@ function stripCodeFences(text: string): string {
     cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
   }
   return cleaned.trim();
+}
+
+async function generateRecommendedTools(
+  requirement: string,
+  aiCall: AICallFn,
+): Promise<RecommendedTool[]> {
+  const systemPrompt =
+    'You are a helpful assistant that recommends relevant tools and resources for learning topics. Return ONLY valid JSON, no markdown or explanation.';
+
+  const userPrompt = `Based on this course about "${requirement}", recommend 5-8 relevant tools:
+- Open-source tools (GitHub repos, libraries, frameworks)
+- SaaS platforms (commercial tools with free tiers)
+- Learning resources (documentation, tutorials, courses)
+
+For each tool, provide: name, one-sentence description, category (open-source/saas/resource), and URL if known.
+
+Return as JSON: { "tools": [{ "name": "...", "description": "...", "url": "...", "category": "open-source|saas|resource" }] }`;
+
+  const response = await aiCall(systemPrompt, userPrompt);
+  const rawText = stripCodeFences(response);
+  let parsed: { tools: Array<{ name: string; description: string; url?: string; category: string }> };
+  try {
+    parsed = JSON.parse(rawText);
+  } catch {
+    log.warn('generateRecommendedTools: LLM returned non-JSON output');
+    return [];
+  }
+
+  if (!parsed.tools || !Array.isArray(parsed.tools)) {
+    return [];
+  }
+
+  return parsed.tools.map((t) => ({
+    name: String(t.name || '').slice(0, 100),
+    description: String(t.description || '').slice(0, 300),
+    // Only allow http(s) URLs — block javascript:, data:, and other schemes
+    url: t.url && /^https?:\/\//i.test(String(t.url)) ? String(t.url) : undefined,
+    category: (['open-source', 'saas', 'resource'].includes(t.category)
+      ? t.category
+      : 'resource') as RecommendedTool['category'],
+    verified: false,
+  }));
 }
 
 async function generateAgentProfiles(
@@ -207,8 +250,21 @@ export async function generateClassroom(
   const requirements: UserRequirements = {
     requirement,
     language: lang,
+    explanationDepth: input.explanationDepth || 'standard',
   };
   const pdfText = pdfContent?.text || undefined;
+
+  // Build user profile text for content generation prompts (sanitized to prevent prompt override)
+  const sanitize = (v: string, max = 200) =>
+    v.slice(0, max).replace(/[`#]/g, '').replace(/\n{2,}/g, '\n').trim();
+  const profileParts: string[] = [];
+  if (requirements.userNickname) profileParts.push(`Student: ${sanitize(requirements.userNickname, 50)}`);
+  if (requirements.userBio) profileParts.push(`About: ${sanitize(requirements.userBio)}`);
+  if (requirements.userBackground) profileParts.push(`Background: ${sanitize(requirements.userBackground, 300)}`);
+  if (requirements.userCareerAspiration) profileParts.push(`Career Goal: ${sanitize(requirements.userCareerAspiration, 300)}`);
+  const userProfileText = profileParts.length > 0
+    ? `## Student Profile\n\n${profileParts.join('\n')}\n\nPersonalization guidelines:\n- Use examples relevant to the student's industry, role, and career goals\n- If background mentions a location/region, use local companies, events, case studies, and tools as examples\n- Link concepts to practical career applications\n- For activities/projects/simulations, design scenarios aligned with their professional context\n- Adapt terminology to their domain`
+    : '';
 
   // Resolve agents based on agentMode
   let agents: AgentInfo[];
@@ -329,6 +385,7 @@ export async function generateClassroom(
       undefined,
       undefined,
       agents,
+      userProfileText,
     );
     if (!content) {
       log.warn(`Skipping scene "${safeOutline.title}" — content generation failed`);
@@ -360,6 +417,18 @@ export async function generateClassroom(
 
   if (scenes.length === 0) {
     throw new Error('No scenes were generated');
+  }
+
+  // Phase: Recommended tools generation
+  try {
+    log.info('Generating recommended tools...');
+    const recommendedTools = await generateRecommendedTools(requirement, aiCall);
+    if (recommendedTools.length > 0) {
+      stage.recommendedTools = recommendedTools;
+      log.info(`Generated ${recommendedTools.length} recommended tools`);
+    }
+  } catch (err) {
+    log.warn('Recommended tools generation failed, continuing:', err);
   }
 
   // Phase: Media generation (after all scenes generated)

@@ -26,6 +26,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setThemeState(stored);
     }
     setSystemTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+    // Apply persisted appearance preferences (accent color, UI font)
+    try {
+      const settingsRaw = localStorage.getItem('settings-storage');
+      if (settingsRaw) {
+        const parsed = JSON.parse(settingsRaw);
+        const state = parsed?.state;
+        if (state?.accentColor && state.accentColor !== 'purple') {
+          document.documentElement.setAttribute('data-accent', state.accentColor);
+        }
+        if (state?.uiFont && state.uiFont !== 'default') {
+          document.documentElement.setAttribute('data-ui-font', state.uiFont);
+        }
+      }
+    } catch { /* ignore parse errors */ }
   }, []);
   /* eslint-enable react-hooks/set-state-in-effect */
 
