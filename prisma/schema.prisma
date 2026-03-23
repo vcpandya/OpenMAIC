@@ -76,6 +76,12 @@ model User {
   sessions       Session[]
   classrooms     Classroom[]
   invitationsSent Invitation[] @relation("InvitationSender")
+  enrollments    ClassroomEnrollment[]
+  quizAttempts   QuizAttempt[]
+  learningEvents LearningEvent[]
+  reviewSchedules ReviewSchedule[]
+  messagingLinks UserMessagingLink[]
+  learningSegments LearningSegment[] @relation("UserSegments")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -99,6 +105,8 @@ model Organization {
   users       User[]
   classrooms  Classroom[]
   invitations Invitation[]
+  integrations Integration[]
+  learningSegments LearningSegment[]
 
   createdById String
   createdAt   DateTime @default(now())
@@ -148,6 +156,146 @@ model Classroom {
   createdById String
   createdBy   User   @relation(fields: [createdById], references: [id])
 
+  enrollments ClassroomEnrollment[]
+  quizAttempts QuizAttempt[]
+  learningEvents LearningEvent[]
+  reviewSchedules ReviewSchedule[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ==================== Learning Analytics ====================
+
+model ClassroomEnrollment {
+  id              String   @id @default(cuid())
+  userId          String
+  classroomId     String
+  progress        Float    @default(0) // 0-100
+  scenesCompleted String[] // Array of completed scene IDs
+  lastAccessedAt  DateTime @default(now())
+  enrolledAt      DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classroomId])
+}
+
+enum LearningEventType {
+  CLASSROOM_ACCESSED
+  SCENE_VIEWED
+  SCENE_COMPLETED
+  QUIZ_ATTEMPTED
+  DISCUSSION_JOINED
+  DISCUSSION_COMPLETED
+}
+
+model LearningEvent {
+  id          String            @id @default(cuid())
+  userId      String
+  classroomId String
+  sceneId     String?
+  eventType   LearningEventType
+  metadata    String?           @db.Text // JSON — extra event data
+  timestamp   DateTime          @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@index([userId, classroomId])
+  @@index([classroomId, eventType])
+}
+
+model QuizAttempt {
+  id          String   @id @default(cuid())
+  userId      String
+  classroomId String
+  questionId  String
+  answer      String   @db.Text
+  score       Float
+  maxScore    Float
+  timestamp   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@index([userId, classroomId])
+}
+
+// ==================== Spaced Repetition ====================
+
+model ReviewSchedule {
+  id           String   @id @default(cuid())
+  userId       String
+  classroomId  String
+  nextReviewAt DateTime
+  interval     Int      @default(1) // days
+  easeFactor   Float    @default(2.5) // SM-2 ease factor
+  reviewCount  Int      @default(0)
+  lastScore    Float?
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classroomId])
+}
+
+// ==================== Messaging Integrations ====================
+
+model Integration {
+  id     String @id @default(cuid())
+  orgId  String
+  type   String // 'telegram' | 'whatsapp'
+  config String @db.Text // JSON — bot token, webhook URL, etc.
+  status String @default("active") // 'active' | 'inactive' | 'error'
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserMessagingLink {
+  id             String @id @default(cuid())
+  userId         String
+  platform       String // 'telegram' | 'whatsapp'
+  platformUserId String // telegram chat_id or whatsapp phone
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([platform, platformUserId])
+  @@index([userId])
+}
+
+// ==================== Daily Auto-Learning ====================
+
+model LearningSegment {
+  id              String   @id @default(cuid())
+  name            String
+  keywords        String[] // Search terms
+  isActive        Boolean  @default(true)
+  lastResearchedAt DateTime?
+
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
+  userId          String?
+  user            User?    @relation("UserSegments", fields: [userId], references: [id])
+
+  digests DailyDigest[]
+
+  createdAt DateTime @default(now())
+}
+
+model DailyDigest {
+  id          String   @id @default(cuid())
+  segmentId   String
+  date        DateTime @default(now())
+  sources     String   @db.Text // JSON — [{url, title, summary, score}]
+  classroomId String?  // Generated classroom ID (if auto-generated)
+  status      String   @default("pending") // 'pending' | 'researched' | 'generated' | 'failed'
+
+  segment LearningSegment @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+
+  @@index([segmentId, date])
 }

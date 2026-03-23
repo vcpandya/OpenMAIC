@@ -26,6 +26,7 @@ import { buildPrompt, PROMPT_IDS } from './prompts';
 import { postProcessInteractiveHtml } from './interactive-post-processor';
 import { parseActionsFromStructuredOutput } from './action-parser';
 import { parseJsonResponse } from './json-repair';
+import { applyLayoutRules, detectLayoutPreset, getLayoutGuidance } from './layout-engine';
 import {
   buildCourseContext,
   formatAgentsForPrompt,
@@ -539,6 +540,7 @@ async function generateSlideContent(
 
   const teacherContext = formatTeacherPersonaForPrompt(agents);
 
+  const layoutPreset = detectLayoutPreset(outline.explanationDepth, undefined);
   const prompts = buildPrompt(PROMPT_IDS.SLIDE_CONTENT, {
     title: outline.title,
     description: outline.description,
@@ -550,6 +552,7 @@ async function generateSlideContent(
     teacherContext,
     explanationDepth: outline.explanationDepth || 'standard',
     userProfile: userProfile || '',
+    layoutGuidance: getLayoutGuidance(layoutPreset),
   });
 
   if (!prompts) {
@@ -606,11 +609,16 @@ async function generateSlideContent(
   log.debug(`After image resolution: ${resolvedElements.length} elements`);
 
   // Process elements, assign unique IDs
-  const processedElements: PPTElement[] = resolvedElements.map((el) => ({
+  const idElements: PPTElement[] = resolvedElements.map((el) => ({
     ...el,
     id: `${el.type}_${nanoid(8)}`,
     rotate: 0,
   })) as PPTElement[];
+
+  // Apply professional layout rules (grid alignment, margins, spacing)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- layout engine uses generic element shape
+  const layoutAdjusted = applyLayoutRules(idElements as any[], detectLayoutPreset(outline.explanationDepth, idElements.length));
+  const processedElements = layoutAdjusted as unknown as PPTElement[];
 
   // Process background
   let background: SlideBackground | undefined;

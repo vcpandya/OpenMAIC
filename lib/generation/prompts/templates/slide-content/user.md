@@ -11,6 +11,8 @@
 
 {{userProfile}}
 
+{{layoutGuidance}}
+
 ## Available Resources
 
 - **Available Images**: {{assignedImages}}

@@ -4,6 +4,47 @@
 
 ### New Features
 
+#### Learning Analytics & Progress Tracking
+- `POST /api/analytics/event` — log scene views, quiz attempts, discussion joins
+- `GET /api/analytics/classroom/:id` — teacher dashboard: completion rates, avg scores, event breakdown
+- `POST /api/analytics/quiz` — log individual quiz attempts with scores
+- `ClassroomEnrollment` model tracks per-student progress and completed scenes
+- Graceful no-op in personal mode (no DB required)
+
+#### Spaced Repetition Engine (SM-2 Algorithm)
+- `GET /api/review/due` — get review items due for current user
+- `POST /api/review/complete` — submit review, recalculate next interval using SM-2
+- Intervals: 1d → 6d → dynamically scaled by ease factor
+- Poor performance (quality < 3) resets interval to 1 day
+
+#### Adaptive Difficulty
+- `lib/analytics/adaptive-difficulty.ts` — pure function analyzing rolling quiz scores
+- Avg > 85% across 5 quizzes → suggest upgrading depth (e.g., Standard → Pro)
+- Avg < 50% → suggest downgrading (e.g., Standard → ELI5)
+- Returns recommendation with reason string for UI display
+
+#### Telegram Bot Integration
+- `POST /api/integrations/telegram/setup` — validate bot token, auto-set webhook (admin only)
+- `POST /api/integrations/telegram/webhook` — receives updates, generates classrooms
+- Account linking via `/link email@example.com` command
+- Org-restricted: only linked users can generate lessons
+- `GET /api/integrations/status` — show connected integrations (tokens stripped)
+
+#### Daily Auto-Learning with Jina AI
+- `lib/research/jina.ts` — Jina Search (`s.jina.ai`) + Reader (`r.jina.ai`) integration
+- `POST /api/segments` — create learning segments with keywords
+- `POST /api/segments/:id/research` — trigger Jina-powered research
+- `GET /api/daily-digest` — get today's curated research digests
+- Segments scoped to org (admin) or personal (user)
+
+#### Professional Slide Layout Engine
+- `lib/generation/layout-engine.ts` — post-processor enforcing professional layout rules
+- Grid alignment (8px), minimum margins (40px), overlap detection and fix
+- 4 style presets: Corporate, Academic, Creative, Dashboard
+- Auto-detects preset from explanation depth (ELI5→Creative, Pro→Academic)
+- `getLayoutGuidance()` injects positioning rules into LLM prompt
+- Two-pass: LLM generates content → layout engine enforces professional positioning
+
 #### Organization Mode (Multi-User Platform)
 - Full multi-user deployment with PostgreSQL database (Prisma ORM)
 - NextAuth.js v5 authentication: email/password + Google/GitHub OAuth
