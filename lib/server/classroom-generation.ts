@@ -99,7 +99,10 @@ function createInMemoryStore(stage: Stage): StageStore {
 
 function normalizeLanguage(language?: string): GenerationLanguage {
   // Accept any valid GenerationLanguage, default to en-US
-  const valid = ['zh-CN', 'en-US', 'es', 'fr', 'de', 'ja', 'ko', 'pt-BR', 'ru', 'ar', 'hi', 'it'];
+  const valid = [
+    'zh-CN', 'en-US', 'es', 'fr', 'de', 'ja', 'ko', 'pt-BR', 'ru', 'ar', 'hi', 'it',
+    'gu', 'bn', 'ta', 'te', 'mr',
+  ];
   return valid.includes(language || '') ? (language as GenerationLanguage) : 'en-US';
 }
 

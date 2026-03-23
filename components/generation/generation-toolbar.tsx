@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
-import { Bot, Check, ChevronLeft, Globe, Paperclip, FileText, X, Globe2, GraduationCap } from 'lucide-react';
+import { Bot, Check, ChevronLeft, Paperclip, FileText, X, Globe2, GraduationCap } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
@@ -20,7 +20,7 @@ import { WEB_SEARCH_PROVIDERS } from '@/lib/web-search/constants';
 import type { WebSearchProviderId } from '@/lib/web-search/types';
 import type { ProviderId } from '@/lib/ai/providers';
 import type { SettingsSection } from '@/lib/types/settings';
-import { GENERATION_LANGUAGES } from '@/lib/types/generation';
+import { GENERATION_LANGUAGES, LANGUAGE_REGIONS } from '@/lib/types/generation';
 import { MediaPopover } from '@/components/generation/media-popover';
 
 // ─── Constants ───────────────────────────────────────────────
@@ -395,27 +395,43 @@ export function GenerationToolbar({
       <Popover>
         <PopoverTrigger asChild>
           <button className={pillMuted}>
-            <Globe className="size-3.5" />
-            <span>{GENERATION_LANGUAGES.find((l) => l.id === language)?.label || language}</span>
+            <span className="text-sm leading-none">{GENERATION_LANGUAGES.find((l) => l.id === language)?.flag || '🌐'}</span>
+            <span>{GENERATION_LANGUAGES.find((l) => l.id === language)?.nativeLabel || language}</span>
           </button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-48 p-1.5 max-h-[280px] overflow-y-auto">
-          {GENERATION_LANGUAGES.map((lang) => (
-            <button
-              key={lang.id}
-              onClick={() => onLanguageChange(lang.id)}
-              className={cn(
-                'w-full flex items-center gap-2 rounded-md px-2.5 py-1.5 text-sm transition-colors text-left',
-                language === lang.id
-                  ? 'bg-primary/10 text-primary font-medium'
-                  : 'hover:bg-muted/50 text-foreground',
-              )}
-            >
-              <span className="text-base leading-none">{lang.flag}</span>
-              <span className="flex-1 truncate">{lang.label}</span>
-              {language === lang.id && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
-            </button>
-          ))}
+        <PopoverContent align="start" className="w-56 p-2 max-h-[380px] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+          {(['popular', 'indian', 'european', 'asian'] as const).map((region) => {
+            const regionLangs = GENERATION_LANGUAGES.filter((l) => l.region === region);
+            if (regionLangs.length === 0) return null;
+            return (
+              <div key={region} className="mb-1.5 last:mb-0">
+                <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/50">
+                  {LANGUAGE_REGIONS[region]}
+                </div>
+                {regionLangs.map((lang) => (
+                  <button
+                    key={lang.id}
+                    onClick={() => onLanguageChange(lang.id)}
+                    className={cn(
+                      'w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-all text-left',
+                      language === lang.id
+                        ? 'bg-primary/10 text-primary font-medium ring-1 ring-primary/20'
+                        : 'hover:bg-muted/60 text-foreground',
+                    )}
+                  >
+                    <span className="text-base leading-none shrink-0">{lang.flag}</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="block text-sm truncate">{lang.nativeLabel}</span>
+                      {lang.label !== lang.nativeLabel && (
+                        <span className="block text-[10px] text-muted-foreground/60 truncate">{lang.label}</span>
+                      )}
+                    </div>
+                    {language === lang.id && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
         </PopoverContent>
       </Popover>
 

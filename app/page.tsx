@@ -113,6 +113,7 @@ function HomePage() {
         const langMap: Record<string, string> = {
           zh: 'zh-CN', en: 'en-US', es: 'es', fr: 'fr', de: 'de',
           ja: 'ja', ko: 'ko', pt: 'pt-BR', ru: 'ru', ar: 'ar', hi: 'hi', it: 'it',
+          gu: 'gu', bn: 'bn', ta: 'ta', te: 'te', mr: 'mr',
         };
         const prefix = browserLang.split('-')[0];
         updates.language = langMap[prefix] || 'en-US';

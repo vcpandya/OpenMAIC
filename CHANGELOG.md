@@ -4,9 +4,12 @@
 
 ### New Features
 
-#### Multi-Language Content Generation
-- Expanded from 2 languages (zh-CN, en-US) to 12 languages: English, Chinese, Spanish, French, German, Japanese, Korean, Portuguese (BR), Russian, Arabic, Hindi, Italian
-- Language selector upgraded from toggle to popover dropdown with flag icons
+#### Multi-Language Content Generation (17 Languages)
+- Expanded from 2 languages to 17 including 6 Indian languages: Hindi, Gujarati, Bengali, Tamil, Telugu, Marathi
+- Full list: English, Chinese, Spanish, Hindi, Gujarati, Bengali, Tamil, Telugu, Marathi, French, German, Italian, Portuguese, Russian, Japanese, Korean, Arabic
+- Redesigned language selector with grouped sections (Popular, Indian Languages, European, Asian & Middle East)
+- Each language shows native script name + English label with flag emoji
+- Selected language highlighted with accent ring
 - Auto-detects browser language on first visit
 - All content (slides, quizzes, interactive activities, PBL projects, discussions) generated in the selected language
 

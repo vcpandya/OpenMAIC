@@ -67,23 +67,49 @@ export type ExplanationDepth = 'eli5' | 'standard' | 'pro';
 /** Supported content generation languages */
 export type GenerationLanguage =
   | 'zh-CN' | 'en-US' | 'es' | 'fr' | 'de' | 'ja' | 'ko'
-  | 'pt-BR' | 'ru' | 'ar' | 'hi' | 'it';
+  | 'pt-BR' | 'ru' | 'ar' | 'hi' | 'it'
+  | 'gu' | 'bn' | 'ta' | 'te' | 'mr';
 
-/** Language display metadata */
-export const GENERATION_LANGUAGES: { id: GenerationLanguage; label: string; flag: string }[] = [
-  { id: 'en-US', label: 'English', flag: '🇺🇸' },
-  { id: 'zh-CN', label: '中文', flag: '🇨🇳' },
-  { id: 'es', label: 'Español', flag: '🇪🇸' },
-  { id: 'fr', label: 'Français', flag: '🇫🇷' },
-  { id: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { id: 'ja', label: '日本語', flag: '🇯🇵' },
-  { id: 'ko', label: '한국어', flag: '🇰🇷' },
-  { id: 'pt-BR', label: 'Português', flag: '🇧🇷' },
-  { id: 'ru', label: 'Русский', flag: '🇷🇺' },
-  { id: 'ar', label: 'العربية', flag: '🇸🇦' },
-  { id: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
-  { id: 'it', label: 'Italiano', flag: '🇮🇹' },
+/** Language display metadata with regional grouping */
+export interface LanguageOption {
+  id: GenerationLanguage;
+  label: string;
+  nativeLabel: string;
+  flag: string;
+  region: 'popular' | 'indian' | 'european' | 'asian';
+}
+
+export const GENERATION_LANGUAGES: LanguageOption[] = [
+  // Popular
+  { id: 'en-US', label: 'English', nativeLabel: 'English', flag: '🇺🇸', region: 'popular' },
+  { id: 'zh-CN', label: 'Chinese', nativeLabel: '中文', flag: '🇨🇳', region: 'popular' },
+  { id: 'es', label: 'Spanish', nativeLabel: 'Español', flag: '🇪🇸', region: 'popular' },
+  // Indian
+  { id: 'hi', label: 'Hindi', nativeLabel: 'हिन्दी', flag: '🇮🇳', region: 'indian' },
+  { id: 'gu', label: 'Gujarati', nativeLabel: 'ગુજરાતી', flag: '🇮🇳', region: 'indian' },
+  { id: 'bn', label: 'Bengali', nativeLabel: 'বাংলা', flag: '🇮🇳', region: 'indian' },
+  { id: 'ta', label: 'Tamil', nativeLabel: 'தமிழ்', flag: '🇮🇳', region: 'indian' },
+  { id: 'te', label: 'Telugu', nativeLabel: 'తెలుగు', flag: '🇮🇳', region: 'indian' },
+  { id: 'mr', label: 'Marathi', nativeLabel: 'मराठी', flag: '🇮🇳', region: 'indian' },
+  // European
+  { id: 'fr', label: 'French', nativeLabel: 'Français', flag: '🇫🇷', region: 'european' },
+  { id: 'de', label: 'German', nativeLabel: 'Deutsch', flag: '🇩🇪', region: 'european' },
+  { id: 'it', label: 'Italian', nativeLabel: 'Italiano', flag: '🇮🇹', region: 'european' },
+  { id: 'pt-BR', label: 'Portuguese', nativeLabel: 'Português', flag: '🇧🇷', region: 'european' },
+  { id: 'ru', label: 'Russian', nativeLabel: 'Русский', flag: '🇷🇺', region: 'european' },
+  // Asian & Middle East
+  { id: 'ja', label: 'Japanese', nativeLabel: '日本語', flag: '🇯🇵', region: 'asian' },
+  { id: 'ko', label: 'Korean', nativeLabel: '한국어', flag: '🇰🇷', region: 'asian' },
+  { id: 'ar', label: 'Arabic', nativeLabel: 'العربية', flag: '🇸🇦', region: 'asian' },
 ];
+
+/** Region labels for grouped display */
+export const LANGUAGE_REGIONS: Record<string, string> = {
+  popular: 'Popular',
+  indian: 'Indian Languages',
+  european: 'European',
+  asian: 'Asian & Middle East',
+};
 
 export interface UserRequirements {
   requirement: string; // Single free-form text for all user input
