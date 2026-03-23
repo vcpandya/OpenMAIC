@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.3.0] - 2026-03-23
+
+### New Features
+
+#### Installation Setup Wizard
+- Beautiful first-run wizard at `/setup` with two deployment modes
+- **Personal Mode** (ready now): Zero config, browser-based storage, single user — works immediately
+- **Organization Mode** (coming soon): Multi-user with PostgreSQL, auth, admin panel, invitations, white-labeling
+- Cookie-based setup detection via middleware — redirects to wizard on first visit
+- Skip wizard entirely with `DEPLOYMENT_MODE=personal` env var for automated deployments
+- Setup state persisted to `data/setup.json` for server-side reference
+
+#### White-Label Branding
+- `NEXT_PUBLIC_BRAND_NAME` — custom app name (default: "OpenMAIC")
+- `NEXT_PUBLIC_BRAND_LOGO` — custom logo URL (default: "/logo-horizontal.png")
+- `NEXT_PUBLIC_PRIMARY_COLOR` — custom primary color
+- Centralized `lib/branding.ts` utility replaces all hardcoded brand references
+- Applied to: page title, header logo, sidebar logo, footer text
+
+---
+
 ## [0.2.1] - 2026-03-23
 
 ### New Features
